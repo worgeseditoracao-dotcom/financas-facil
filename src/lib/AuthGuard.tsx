@@ -1,0 +1,49 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
+import { AuthProvider, useAuth } from './AuthContext'
+import Sidebar from '@/components/layout/Sidebar'
+import Header from '@/components/layout/Header'
+import FloatingButton from '@/components/layout/FloatingButton'
+import { type ReactNode } from 'react'
+
+const PUBLIC_ROUTES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado']
+
+function Shell({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth()
+  const pathname = usePathname()
+  const isPublic = PUBLIC_ROUTES.includes(pathname)
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-emerald-500" />
+      </div>
+    )
+  }
+
+  if (isPublic) {
+    return <>{children}</>
+  }
+
+  return (
+    <>
+      <Sidebar />
+      <div className="flex flex-1 flex-col min-w-0">
+        <Header />
+        <main className="flex-1 overflow-auto p-4 md:p-6">
+          {children}
+        </main>
+      </div>
+      <FloatingButton />
+    </>
+  )
+}
+
+export default function AuthGuard({ children }: { children: ReactNode }) {
+  return (
+    <AuthProvider>
+      <Shell>{children}</Shell>
+    </AuthProvider>
+  )
+}
