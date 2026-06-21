@@ -1,8 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Script from 'next/script'
 import { CheckCircle2, ArrowRight, Shield, ChevronDown, ChevronUp, Smartphone, Monitor, BarChart3, Target, CreditCard, FileText, PiggyBank, TrendingUp, Users, DollarSign } from 'lucide-react'
 import { CAKTO_CHECKOUT_URL, APP_NAME, APP_PRICE, APP_PRICE_PIX, APP_PRICE_INSTALLMENTS, SUPPORT_EMAIL, SUPPORT_WHATSAPP } from '@/lib/config'
+
+const PIXEL_ID = '1193761196228886'
+
+function trackEvent(event: string, data?: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('track', event, data)
+  }
+}
+
+function trackCheckout() {
+  trackEvent('InitiateCheckout', {
+    content_name: 'Finanças Fácil - Acesso Vitalício',
+    value: 67.00,
+    currency: 'BRL',
+  })
+}
 
 const faq = [
   { q: 'O que é o Finanças Fácil?', a: 'É um sistema completo de gestão financeira pessoal e empresarial. Você controla receitas, despesas, contas, cartões, metas, investimentos e muito mais em um só lugar.' },
@@ -28,8 +45,25 @@ const benefits = [
 export default function Vendas() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
+  useEffect(() => {
+    trackEvent('PageView')
+  }, [])
+
+  const handleBuy = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    trackCheckout()
+    // Deixa o link seguir normalmente
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      {/* Meta Pixel */}
+      <Script id="meta-pixel" strategy="afterInteractive">
+        {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${PIXEL_ID}');fbq('track','PageView');`}
+      </Script>
+      <noscript>
+        <img height="1" width="1" style={{ display: 'none' }}
+          src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`} />
+      </noscript>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
@@ -39,7 +73,7 @@ export default function Vendas() {
               className="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
               Já comprei / Entrar
             </a>
-            <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer"
+            <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer" onClick={handleBuy}
               className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-600 transition-colors">
               Comprar Agora
             </a>
@@ -61,7 +95,7 @@ export default function Vendas() {
               Controle receitas, despesas, contas, metas, cartões e relatórios em um único app simples, bonito e fácil de usar.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer"
+              <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer" onClick={handleBuy}
                 className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-8 py-4 text-base font-semibold text-black hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/25">
                 Quero Organizar Minhas Finanças <ArrowRight size={20} />
               </a>
@@ -173,7 +207,7 @@ export default function Vendas() {
                   </li>
                 ))}
               </ul>
-              <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer"
+              <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer" onClick={handleBuy}
                 className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-8 py-4 text-base font-semibold text-black hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/25">
                 Quero Comprar Agora <ArrowRight size={20} />
               </a>
@@ -222,7 +256,7 @@ export default function Vendas() {
           <p className="mt-4 text-lg text-zinc-500">
             Mais de 1000 pessoas já estão usando o Finanças Fácil para controlar o dinheiro de verdade.
           </p>
-          <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer"
+          <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer" onClick={handleBuy}
             className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-10 py-4 text-base font-semibold text-black hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/25">
             Quero Meu Acesso Agora <ArrowRight size={20} />
           </a>
