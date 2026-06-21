@@ -7,3 +7,8 @@ export const APP_NAME = 'Finanças Fácil'
 export const APP_PRICE = 'R$ 67,00'
 export const APP_PRICE_PIX = 'R$ 57,00'
 export const APP_PRICE_INSTALLMENTS = '12x de R$ 6,70'
+
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://financas-facil-worgesprojetos.vercel.app'
+
+// A URL do webhook é derivada da APP_URL
+export const CAKTO_WEBHOOK_URL = `${APP_URL}/api/webhooks/cakto`

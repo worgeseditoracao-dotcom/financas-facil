@@ -34,10 +34,16 @@ export default function Vendas() {
       <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <span className="text-lg font-bold" style={{ color: 'var(--accent, #A855F7)' }}>Finanças Fácil</span>
-          <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer"
-            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-600 transition-colors">
-            Comprar Agora
-          </a>
+          <div className="flex items-center gap-2">
+            <a href="/login"
+              className="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
+              Já comprei / Entrar
+            </a>
+            <a href={CAKTO_CHECKOUT_URL} target="_blank" rel="noopener noreferrer"
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-600 transition-colors">
+              Comprar Agora
+            </a>
+          </div>
         </div>
       </header>
 
@@ -221,6 +227,17 @@ export default function Vendas() {
             Quero Meu Acesso Agora <ArrowRight size={20} />
           </a>
           <p className="mt-3 text-sm text-zinc-400">7 dias de garantia · Acesso vitalício · Suporte prioritário</p>
+
+          <div className="mt-8 pt-8 border-t border-zinc-100">
+            <p className="text-sm text-zinc-500">Já comprou?</p>
+            <a href="/login" className="mt-2 inline-flex items-center gap-2 rounded-xl border border-zinc-200 px-6 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
+              Fazer Login
+            </a>
+            <span className="mx-2 text-zinc-300">ou</span>
+            <a href="/primeiro-acesso" className="text-sm font-medium text-emerald-500 hover:text-emerald-600">
+              Criar senha (primeiro acesso)
+            </a>
+          </div>
         </div>
       </section>
 

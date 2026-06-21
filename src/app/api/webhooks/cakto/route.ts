@@ -1,64 +1,105 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuid } from 'uuid'
 import {
-  findUserByEmail, createUser, updateUser, updateUserById,
+  findUserByEmail, findUserById, createUser, updateUser, updateUserById,
   findPurchaseByTransactionId, createPurchase, createWebhookLog
 } from '@/lib/db'
-import { isPaymentApproved, isChargebackOrRefund, verifyCaktoWebhook } from '@/lib/auth'
+import {
+  verifyCaktoPayloadSecret, APPROVED_STATUSES, REVOKED_STATUSES, CAKTO_EVENTS
+} from '@/lib/cakto'
+
+// Estrutura do payload da Cakto (docs: https://docs.cakto.com.br)
+interface CaktoWebhookPayload {
+  event: string
+  secret: string
+  data: {
+    id: string               // Order ID (UUID)
+    refId: string            // ID curto de referência
+    status: string           // paid, refunded, chargedback, canceled...
+    amount: number
+    paidAt: string | null
+    refundedAt: string | null
+    chargedbackAt: string | null
+    canceledAt: string | null
+    refund_reason: string | null
+    reason: string | null
+    paymentMethod: string
+    installments: number
+    product: {
+      id: string
+      name: string
+      type: 'unique' | 'subscription'
+    }
+    offer: {
+      id: string
+      name: string
+      price: number
+    }
+    customer: {
+      name: string
+      email: string
+      phone?: string
+      docType?: string
+      docNumber?: string
+    }
+    subscription?: string | null
+    checkoutUrl?: string
+  }
+}
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
-  const signature = req.headers.get('x-cakto-signature') || req.headers.get('x-hub-signature-256') || ''
-  const eventType = req.headers.get('x-cakto-event') || req.headers.get('x-event-type') || ''
+  let payload: CaktoWebhookPayload
 
-  if (!verifyCaktoWebhook(rawBody, signature.replace('sha256=', ''))) {
-    await createWebhookLog({
-      provider: 'cakto',
-      event_type: eventType || 'unknown',
-      transaction_id: '',
-      email: '',
-      payload: rawBody,
-      processed: false,
-      error_message: 'Assinatura inválida',
-    })
-    return NextResponse.json({ error: 'Assinatura inválida' }, { status: 401 })
-  }
-
-  let payload: any
   try {
     payload = JSON.parse(rawBody)
   } catch {
-    return NextResponse.json({ error: 'Payload inválido' }, { status: 400 })
+    return NextResponse.json({ error: 'Payload JSON inválido' }, { status: 400 })
   }
 
-  const transactionId = payload.id || payload.transaction_id || payload.transaction?.id || ''
-  const buyerEmail = payload.email || payload.customer?.email || payload.buyer?.email || payload.transaction?.customer?.email || ''
-  const buyerName = payload.name || payload.customer?.name || payload.buyer?.name || payload.transaction?.customer?.name || ''
-  const status = payload.status || payload.transaction?.status || payload.payment_status || ''
-  const productName = payload.product?.name || payload.product_name || payload.transaction?.product?.name || 'Finanças Fácil'
-  const productId = payload.product?.id || payload.product_id || payload.transaction?.product?.id || ''
-  const amount = payload.amount || payload.transaction?.amount || payload.value || 0
-  const paymentMethod = payload.payment_method || payload.transaction?.payment_method || ''
-
-  if (!buyerEmail || !transactionId) {
-    return NextResponse.json({ error: 'Dados inválidos - email e transaction_id obrigatórios' }, { status: 400 })
+  // Verificação do secret (campo secret no body — padrão Cakto)
+  if (!verifyCaktoPayloadSecret(payload.secret || '')) {
+    await createWebhookLog({
+      provider: 'cakto',
+      event_type: payload.event || 'unknown',
+      transaction_id: payload.data?.id || '',
+      email: payload.data?.customer?.email || '',
+      payload: rawBody,
+      processed: false,
+      error_message: 'Secret inválido',
+    })
+    return NextResponse.json({ error: 'Secret inválido' }, { status: 401 })
   }
 
-  const emailLower = buyerEmail.toLowerCase().trim()
+  const { event, data } = payload
 
-  const existingPurchase = await findPurchaseByTransactionId(String(transactionId))
-  if (existingPurchase) {
-    return NextResponse.json({ message: 'Transação já processada', duplicate: true })
+  if (!data?.id || !data?.customer?.email) {
+    return NextResponse.json({ error: 'Dados obrigatórios ausentes (id, customer.email)' }, { status: 400 })
   }
+
+  const orderId = data.id
+  const email = data.customer.email.toLowerCase().trim()
+  const name = data.customer.name || email
+  const productName = data.product?.name || 'Finanças Fácil'
+  const amount = Number(data.amount) || 0
+  const status = data.status
+
+  // Deduplicação
+  const existing = await findPurchaseByTransactionId(orderId)
 
   try {
-    if (isPaymentApproved(status)) {
-      let user = await findUserByEmail(emailLower)
+    // ─── COMPRA APROVADA ───────────────────────────────────────────────
+    if (event === CAKTO_EVENTS.PURCHASE_APPROVED || APPROVED_STATUSES.has(status)) {
+      if (existing) {
+        return NextResponse.json({ message: 'Pedido já processado', duplicate: true })
+      }
+
+      let user = await findUserByEmail(email)
       if (!user) {
         user = await createUser({
           id: uuid(),
-          name: buyerName || emailLower,
-          email: emailLower,
+          name,
+          email,
           password_hash: '',
           auth_provider: 'email',
           role: 'user',
@@ -66,131 +107,186 @@ export async function POST(req: NextRequest) {
           access_type: 'lifetime',
         })
       } else {
-        user = await updateUser(emailLower, {
+        user = await updateUser(email, {
+          name: name || user.name,
           access_status: 'active',
           access_type: 'lifetime',
           blocked_reason: undefined,
           blocked_at: undefined,
-          name: buyerName || user.name,
         })
       }
 
       await createPurchase({
         id: uuid(),
         user_id: user!.id,
-        email: emailLower,
-        transaction_id: String(transactionId),
-        product_id: productId,
+        email,
+        transaction_id: orderId,
+        product_id: data.product?.id || '',
         product_name: productName,
-        amount: Number(amount),
-        payment_status: status,
-        payment_method: paymentMethod,
+        amount,
+        payment_status: 'paid',
+        payment_method: data.paymentMethod || '',
         raw_payload: rawBody,
       })
 
       await createWebhookLog({
         provider: 'cakto',
-        event_type: eventType || 'payment_approved',
-        transaction_id: String(transactionId),
-        email: emailLower,
+        event_type: event,
+        transaction_id: orderId,
+        email,
         payload: rawBody,
         processed: true,
       })
 
       return NextResponse.json({
-        message: 'Compra aprovada - acesso vitalício ativado',
-        access_granted: true,
+        ok: true,
+        message: 'Compra aprovada — acesso vitalício ativado',
         user_id: user!.id,
+        email,
       })
     }
 
-    if (isChargebackOrRefund(status)) {
-      const purchase = await findPurchaseByTransactionId(String(transactionId))
-      const user = purchase
+    // ─── REEMBOLSO ─────────────────────────────────────────────────────
+    if (event === CAKTO_EVENTS.REFUND || status === 'refunded' || status === 'refund_requested') {
+      const purchase = existing || await findPurchaseByTransactionId(orderId)
+      let user = purchase
         ? await findUserById(purchase.user_id)
-        : await findUserByEmail(emailLower)
-
-      const blockReason = status.toLowerCase().includes('chargeback')
-        ? 'chargeback'
-        : status.toLowerCase().includes('refund')
-          ? 'reembolso'
-          : 'cancelamento'
+        : await findUserByEmail(email)
 
       if (user) {
         await updateUserById(user.id, {
           access_status: 'blocked',
-          blocked_reason: blockReason,
+          blocked_reason: 'reembolso',
           blocked_at: new Date().toISOString(),
         })
       }
 
-      if (!purchase) {
+      if (!existing) {
         await createPurchase({
           id: uuid(),
-          user_id: user?.id || 'unknown',
-          email: emailLower,
-          transaction_id: String(transactionId),
-          product_id: productId,
+          user_id: user?.id || '',
+          email,
+          transaction_id: orderId,
+          product_id: data.product?.id || '',
           product_name: productName,
-          amount: Number(amount),
-          payment_status: status,
-          payment_method: paymentMethod,
+          amount,
+          payment_status: 'refunded',
+          payment_method: data.paymentMethod || '',
           raw_payload: rawBody,
         })
       }
 
       await createWebhookLog({
         provider: 'cakto',
-        event_type: eventType || blockReason,
-        transaction_id: String(transactionId),
-        email: emailLower,
+        event_type: event,
+        transaction_id: orderId,
+        email,
         payload: rawBody,
         processed: true,
       })
 
       return NextResponse.json({
-        message: `${blockReason} processado - acesso bloqueado`,
-        access_blocked: true,
-        reason: blockReason,
+        ok: true,
+        message: 'Reembolso processado — acesso bloqueado',
+        email,
+        reason: data.refund_reason || 'reembolso solicitado',
       })
     }
 
-    await createPurchase({
-      id: uuid(),
-      user_id: '',
-      email: emailLower,
-      transaction_id: String(transactionId),
-      product_id: productId,
-      product_name: productName,
-      amount: Number(amount),
-      payment_status: status,
-      payment_method: paymentMethod,
-      raw_payload: rawBody,
-    })
+    // ─── CHARGEBACK ─────────────────────────────────────────────────────
+    if (event === CAKTO_EVENTS.CHARGEBACK || status === 'chargedback') {
+      const purchase = existing || await findPurchaseByTransactionId(orderId)
+      let user = purchase
+        ? await findUserById(purchase.user_id)
+        : await findUserByEmail(email)
 
+      if (user) {
+        await updateUserById(user.id, {
+          access_status: 'blocked',
+          blocked_reason: 'chargeback',
+          blocked_at: new Date().toISOString(),
+        })
+      }
+
+      if (!existing) {
+        await createPurchase({
+          id: uuid(),
+          user_id: user?.id || '',
+          email,
+          transaction_id: orderId,
+          product_id: data.product?.id || '',
+          product_name: productName,
+          amount,
+          payment_status: 'chargedback',
+          payment_method: data.paymentMethod || '',
+          raw_payload: rawBody,
+        })
+      }
+
+      await createWebhookLog({
+        provider: 'cakto',
+        event_type: event,
+        transaction_id: orderId,
+        email,
+        payload: rawBody,
+        processed: true,
+      })
+
+      return NextResponse.json({ ok: true, message: 'Chargeback processado — acesso bloqueado', email })
+    }
+
+    // ─── CANCELAMENTO / ASSINATURA ──────────────────────────────────────
+    if (
+      event === CAKTO_EVENTS.SUBSCRIPTION_CANCELED ||
+      REVOKED_STATUSES.has(status)
+    ) {
+      let user = await findUserByEmail(email)
+      if (user) {
+        await updateUserById(user.id, {
+          access_status: 'blocked',
+          blocked_reason: 'cancelamento',
+          blocked_at: new Date().toISOString(),
+        })
+      }
+
+      await createWebhookLog({
+        provider: 'cakto',
+        event_type: event,
+        transaction_id: orderId,
+        email,
+        payload: rawBody,
+        processed: true,
+      })
+
+      return NextResponse.json({ ok: true, message: 'Cancelamento processado — acesso bloqueado', email })
+    }
+
+    // ─── OUTROS EVENTOS (pix_gerado, boleto_gerado, etc.) ──────────────
     await createWebhookLog({
       provider: 'cakto',
-      event_type: eventType || 'unknown_status',
-      transaction_id: String(transactionId),
-      email: emailLower,
+      event_type: event,
+      transaction_id: orderId,
+      email,
       payload: rawBody,
       processed: true,
-      error_message: `Status não reconhecido: ${status}`,
+      error_message: `Evento informativo: ${event}`,
     })
 
-    return NextResponse.json({ message: 'Evento registrado - status pendente' })
+    return NextResponse.json({ ok: true, message: `Evento ${event} registrado` })
   } catch (err: any) {
+    console.error('Webhook Cakto error:', err)
     await createWebhookLog({
       provider: 'cakto',
-      event_type: eventType || 'error',
-      transaction_id: String(transactionId),
-      email: emailLower,
+      event_type: event || 'error',
+      transaction_id: orderId || '',
+      email: email || '',
       payload: rawBody,
       processed: false,
       error_message: err?.message || 'Erro interno',
-    })
+    }).catch(() => {})
 
-    console.error('Webhook error:', err)
     return NextResponse.json({ error: 'Erro interno ao processar webhook' }, { status: 500 })
   }
 }
+
+

@@ -1,14 +1,64 @@
 'use client'
 
+import { useState } from 'react'
 import { useStore } from '@/lib/store'
+import { useAuth } from '@/lib/AuthContext'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { Download, Trash2, Palette } from 'lucide-react'
+import { Download, Trash2, Palette, ShieldOff } from 'lucide-react'
 import { exportToExcel, exportToPDF, exportToCSV } from '@/lib/export'
 import { ACCENT_COLORS } from '@/lib/constants'
 
+function CancelAccount() {
+  const [orderId, setOrderId] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<{ ok?: boolean; message?: string; error?: string } | null>(null)
+
+  const handleRefund = async () => {
+    if (!orderId.trim()) return
+    setSubmitting(true)
+    setResult(null)
+    try {
+      const res = await fetch('/api/user/refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: orderId.trim() }),
+      })
+      const data = await res.json()
+      setResult(data)
+    } catch {
+      setResult({ error: 'Erro de conexão' })
+    }
+    setSubmitting(false)
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      <p className="text-sm text-zinc-500">Informe o ID do seu pedido Cakto (encontrado no e-mail de confirmação) para solicitar o reembolso dentro do prazo de 7 dias.</p>
+      <div className="flex gap-2">
+        <Input
+          placeholder="ID do pedido (ex: 10bb51bb-...)"
+          value={orderId}
+          onChange={e => setOrderId(e.target.value)}
+          className="flex-1"
+        />
+        <Button variant="danger" onClick={handleRefund} disabled={submitting || !orderId.trim()}>
+          {submitting ? 'Solicitando...' : 'Solicitar Reembolso'}
+        </Button>
+      </div>
+      {result && (
+        <div className={`text-sm p-3 rounded-xl ${result.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+          {result.message || result.error}
+          {result.ok && <p className="mt-1 text-xs text-emerald-500">Seu acesso será bloqueado após a Cakto processar o reembolso.</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Settings() {
   const { state, deleteTransaction, updateSettings } = useStore()
+  const { user } = useAuth()
 
   const handleExportAll = () => exportToExcel(state.transactions, 'financas-facil-completo')
   const handleExportPDF = () => exportToPDF(state.transactions, 'financas-facil-completo')
@@ -21,50 +71,29 @@ export default function Settings() {
   return (
     <div className="space-y-6 animate-in max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Configurações</h1>
-        <p className="mt-1 text-sm text-zinc-500">Personalize sua experiência</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Configurações</h1>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Personalize sua experiência</p>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-        <h2 className="text-base font-semibold text-zinc-900 mb-2">Perfil</h2>
-        <Input label="Seu Nome" placeholder="Seu nome" value={state.settings.name}
-          onChange={e => updateSettings({ name: e.target.value })} />
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Perfil</h2>
+        <Input label="Seu Nome" placeholder="Seu nome" value={state.settings.name} onChange={e => updateSettings({ name: e.target.value })} />
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-        <h2 className="text-base font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-          <Palette size={18} className="text-emerald-400" />
-          Personalizar Cor do Tema
-        </h2>
-        <p className="text-sm text-zinc-500 mb-4">Escolha a cor principal do sistema</p>
-        <div className="flex flex-wrap gap-3">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Aparência</h2>
+        <div className="flex flex-wrap gap-2">
           {ACCENT_COLORS.map(color => (
-            <button key={color.value} onClick={() => updateSettings({ accentColor: color.value })}
-              className={`h-12 w-12 rounded-xl transition-all ${state.settings.accentColor === color.value ? 'ring-2 ring-white scale-110 ring-offset-2 ring-offset-zinc-50' : 'hover:scale-105'}`}
-              style={{ backgroundColor: color.value }}>
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <span className="text-sm text-zinc-500">Cor atual:</span>
-          <div className="h-6 w-6 rounded-lg" style={{ backgroundColor: state.settings.accentColor }} />
-          <span className="text-sm text-zinc-900 font-mono">{state.settings.accentColor}</span>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-        <h2 className="text-base font-semibold text-zinc-900 mb-2">Moeda</h2>
-        <div className="flex gap-2">
-          {[{ value: 'BRL', label: 'R$ Real' }, { value: 'USD', label: '$ Dólar' }, { value: 'EUR', label: '€ Euro' }].map(m => (
-            <button key={m.value} onClick={() => updateSettings({ currency: m.value as any })}
-              className={`flex-1 rounded-xl py-2 text-sm font-medium ${state.settings.currency === m.value ? 'bg-emerald-500 text-black' : 'bg-zinc-200 text-zinc-500'}`}>{m.label}</button>
+            <button key={color} onClick={() => updateSettings({ accentColor: color })}
+              className={`w-8 h-8 rounded-full border-2 transition-all ${state.settings.accentColor === color ? 'border-zinc-900 dark:border-zinc-100 scale-110' : 'border-transparent'}`}
+              style={{ backgroundColor: color }} />
           ))}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-        <h2 className="text-base font-semibold text-zinc-900">Exportar Dados</h2>
-        <p className="mt-1 text-sm text-zinc-500">Exporte suas transações para Excel ou PDF</p>
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Exportar Dados</h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Exporte suas transações para Excel, PDF ou CSV</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="secondary" onClick={handleExportAll}><Download size={16} /> Excel</Button>
           <Button variant="secondary" onClick={handleExportPDF}><Download size={16} /> PDF</Button>
@@ -72,21 +101,25 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-red-400/30 bg-zinc-50 p-5">
-        <h2 className="text-base font-semibold text-red-400">Zona de Perigo</h2>
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50"><ShieldOff size={18} className="inline mr-1" /> Cancelar Conta</h2>
+        <CancelAccount />
+      </div>
+
+      <div className="rounded-2xl border border-red-200 bg-white p-5 dark:border-red-900/30 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-red-600 dark:text-red-400">Zona de Perigo</h2>
         <p className="mt-1 text-sm text-zinc-500">Ações irreversíveis</p>
         <div className="mt-4">
           <Button variant="danger" onClick={handleClearData}><Trash2 size={16} /> Limpar Todos os Dados</Button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-        <h2 className="text-base font-semibold text-zinc-900">Sobre</h2>
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Sobre</h2>
         <div className="mt-3 space-y-1 text-sm text-zinc-500">
           <p>Finanças Fácil v2.0.0</p>
           <p>Sistema de gestão financeira completo</p>
           <p>Pessoal e Empresarial</p>
-          <p className="mt-2 text-xs">{state.transactions.length} transações · {state.bankAccounts.length} contas · {state.creditCards.length} cartões · {state.investments.length} investimentos · {state.goals.length} metas</p>
         </div>
       </div>
     </div>
