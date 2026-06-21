@@ -1,22 +1,20 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { AuthProvider, useAuth } from './AuthContext'
+import { AuthProvider, useAuth, PUBLIC_ROUTES } from './AuthContext'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import FloatingButton from '@/components/layout/FloatingButton'
 import { type ReactNode } from 'react'
 
-const PUBLIC_ROUTES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado']
-
 function Shell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   const pathname = usePathname()
-  const isPublic = PUBLIC_ROUTES.includes(pathname)
+  const isPublic = PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/api')
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-white">
+      <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-zinc-950">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-emerald-500" />
       </div>
     )

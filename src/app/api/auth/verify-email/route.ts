@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json()
     if (!email) return NextResponse.json({ error: 'Email obrigatório' }, { status: 400 })
 
-    const user = findUserByEmail(email.toLowerCase())
+    const user = await findUserByEmail(email.toLowerCase())
     if (!user || user.access_status !== 'active') {
       return NextResponse.json({
         exists: false,

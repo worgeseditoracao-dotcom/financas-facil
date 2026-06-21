@@ -8,6 +8,8 @@ interface User {
   name: string
   email: string
   access_status: string
+  access_type?: string
+  role?: string
 }
 
 interface AuthContextType {
@@ -20,7 +22,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const PUBLIC_ROUTES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado']
+export const PUBLIC_ROUTES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado']
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -33,22 +35,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch('/api/auth/me')
       if (res.ok) {
         const data = await res.json()
-        setUser(data.user)
-        setLoading(false)
-        return
+        if (data.user) {
+          if (data.user.access_status === 'blocked') {
+            setUser(null)
+            setLoading(false)
+            router.replace('/acesso-bloqueado')
+            return
+          }
+          if (data.user.access_status !== 'active') {
+            setUser(null)
+            setLoading(false)
+            router.replace('/vendas')
+            return
+          }
+          setUser(data.user)
+          setLoading(false)
+          return
+        }
       }
     } catch {}
     setUser(null)
     setLoading(false)
-  }, [])
+  }, [router])
 
   useEffect(() => { checkAuth() }, [checkAuth])
 
   useEffect(() => {
     if (loading) return
-
     const isPublic = PUBLIC_ROUTES.includes(pathname)
-
     if (!user && !isPublic) {
       router.replace('/vendas')
     }
@@ -66,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.user)
         return { success: true }
       }
-      return { success: false, error: data.error || 'Erro ao fazer login' }
+      return { success: false, error: data.error || 'Email ou senha inválidos' }
     } catch {
       return { success: false, error: 'Erro de conexão' }
     }
