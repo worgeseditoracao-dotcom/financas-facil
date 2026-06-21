@@ -1,4 +1,4 @@
-import { kv } from '@vercel/kv'
+import { supabase } from './supabase'
 import { v4 as uuid } from 'uuid'
 
 export interface UserRow {
@@ -31,17 +31,6 @@ export interface PurchaseRow {
   updated_at: string
 }
 
-export interface AccessControlRow {
-  id: string
-  user_id: string
-  access_type: 'lifetime' | 'subscription' | 'trial'
-  status: 'active' | 'inactive' | 'blocked'
-  activated_at?: string
-  blocked_at?: string
-  blocked_reason?: string
-  created_at: string
-}
-
 export interface WebhookLogRow {
   id: string
   provider: string
@@ -54,94 +43,80 @@ export interface WebhookLogRow {
   created_at: string
 }
 
-async function getUsers(): Promise<UserRow[]> {
-  const users = await kv.get<UserRow[]>('users')
-  return users || []
-}
-
-async function setUsers(users: UserRow[]): Promise<void> {
-  await kv.set('users', users)
-}
-
-async function getPurchases(): Promise<PurchaseRow[]> {
-  const purchases = await kv.get<PurchaseRow[]>('purchases')
-  return purchases || []
-}
-
-async function setPurchases(purchases: PurchaseRow[]): Promise<void> {
-  await kv.set('purchases', purchases)
-}
-
-async function getWebhookLogs(): Promise<WebhookLogRow[]> {
-  const logs = await kv.get<WebhookLogRow[]>('webhook_logs')
-  return logs || []
-}
-
-async function setWebhookLogs(logs: WebhookLogRow[]): Promise<void> {
-  await kv.set('webhook_logs', logs)
-}
-
 export async function findUserByEmail(email: string): Promise<UserRow | undefined> {
-  const users = await getUsers()
-  return users.find(u => u.email === email.toLowerCase())
+  const { data } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .maybeSingle()
+  return data || undefined
 }
 
 export async function findUserById(id: string): Promise<UserRow | undefined> {
-  const users = await getUsers()
-  return users.find(u => u.id === id)
+  const { data } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+  return data || undefined
 }
 
-export async function createUser(data: Omit<UserRow, 'created_at' | 'updated_at'>): Promise<UserRow> {
-  const users = await getUsers()
+export async function createUser(user: Omit<UserRow, 'created_at' | 'updated_at'>): Promise<UserRow> {
   const now = new Date().toISOString()
-  const user: UserRow = { ...data, created_at: now, updated_at: now }
-  users.push(user)
-  await setUsers(users)
-  return user
+  const newUser: UserRow = { ...user, created_at: now, updated_at: now }
+  const { data, error } = await supabase.from('users').insert(newUser).select().single()
+  if (error) throw new Error(`Erro ao criar usuário: ${error.message}`)
+  return data
 }
 
 export async function updateUser(email: string, updates: Partial<UserRow>): Promise<UserRow | undefined> {
-  const users = await getUsers()
-  const idx = users.findIndex(u => u.email === email.toLowerCase())
-  if (idx === -1) return undefined
-  users[idx] = { ...users[idx], ...updates, updated_at: new Date().toISOString() }
-  await setUsers(users)
-  return users[idx]
+  const { data, error } = await supabase
+    .from('users')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('email', email.toLowerCase())
+    .select()
+    .maybeSingle()
+  if (error) throw new Error(`Erro ao atualizar usuário: ${error.message}`)
+  return data || undefined
 }
 
 export async function updateUserById(id: string, updates: Partial<UserRow>): Promise<UserRow | undefined> {
-  const users = await getUsers()
-  const idx = users.findIndex(u => u.id === id)
-  if (idx === -1) return undefined
-  users[idx] = { ...users[idx], ...updates, updated_at: new Date().toISOString() }
-  await setUsers(users)
-  return users[idx]
+  const { data, error } = await supabase
+    .from('users')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .maybeSingle()
+  if (error) throw new Error(`Erro ao atualizar usuário: ${error.message}`)
+  return data || undefined
 }
 
 export async function findPurchaseByTransactionId(transactionId: string): Promise<PurchaseRow | undefined> {
-  const purchases = await getPurchases()
-  return purchases.find(p => p.transaction_id === transactionId)
+  const { data } = await supabase
+    .from('purchases')
+    .select('*')
+    .eq('transaction_id', transactionId)
+    .maybeSingle()
+  return data || undefined
 }
 
-export async function createPurchase(data: Omit<PurchaseRow, 'created_at' | 'updated_at'>): Promise<PurchaseRow> {
-  const purchases = await getPurchases()
+export async function createPurchase(purchase: Omit<PurchaseRow, 'created_at' | 'updated_at'>): Promise<PurchaseRow> {
   const now = new Date().toISOString()
-  const purchase: PurchaseRow = { ...data, created_at: now, updated_at: now }
-  purchases.push(purchase)
-  await setPurchases(purchases)
-  return purchase
+  const newPurchase: PurchaseRow = { ...purchase, created_at: now, updated_at: now }
+  const { data, error } = await supabase.from('purchases').insert(newPurchase).select().single()
+  if (error) throw new Error(`Erro ao criar compra: ${error.message}`)
+  return data
 }
 
 export async function getAllUsers(): Promise<UserRow[]> {
-  return getUsers()
+  const { data } = await supabase.from('users').select('*')
+  return data || []
 }
 
-export async function createWebhookLog(data: Omit<WebhookLogRow, 'id' | 'created_at'>): Promise<WebhookLogRow> {
-  const logs = await getWebhookLogs()
+export async function createWebhookLog(log: Omit<WebhookLogRow, 'id' | 'created_at'>): Promise<WebhookLogRow> {
   const now = new Date().toISOString()
-  const log: WebhookLogRow = { ...data, id: uuid(), created_at: now }
-  logs.push(log)
-  if (logs.length > 1000) logs.splice(0, logs.length - 1000)
-  await setWebhookLogs(logs)
-  return log
+  const entry: WebhookLogRow = { ...log, id: uuid(), created_at: now }
+  const { data, error } = await supabase.from('webhook_logs').insert(entry).select().single()
+  if (error) throw new Error(`Erro ao criar log: ${error.message}`)
+  return data
 }
