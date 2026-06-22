@@ -11,6 +11,7 @@ function Shell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   const pathname = usePathname()
   const isPublic = PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/api')
+  const isAdmin = pathname.startsWith('/admin')
 
   if (loading) {
     return (
@@ -21,6 +22,18 @@ function Shell({ children }: { children: ReactNode }) {
   }
 
   if (isPublic) {
+    return <>{children}</>
+  }
+
+  // Admin routes: não renderiza sidebar/header normais (admin layout cuida disso)
+  if (isAdmin) {
+    if (!user || user.role !== 'admin') {
+      return (
+        <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-zinc-950">
+          <p className="text-zinc-500">Acesso restrito a administradores</p>
+        </div>
+      )
+    }
     return <>{children}</>
   }
 

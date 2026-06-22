@@ -63,8 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (loading) return
     const isPublic = PUBLIC_ROUTES.includes(pathname)
-    if (!user && !isPublic) {
+    const isAdmin = pathname.startsWith('/admin')
+    if (!user && !isPublic && !isAdmin) {
       router.replace('/vendas')
+    }
+    if (isAdmin && user && user.role !== 'admin') {
+      router.replace('/')
     }
   }, [user, loading, pathname, router])
 
