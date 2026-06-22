@@ -87,6 +87,12 @@ export default function EconomizzeiPage() {
         .animate-fade-in { animation: fadeInUp .8s ease-out forwards; }
         .animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
         .delay-1 { animation-delay: .1s; } .delay-2 { animation-delay: .2s; } .delay-3 { animation-delay: .3s; } .delay-4 { animation-delay: .4s; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+        .animate-bounce-in { animation: bounceIn 0.6s ease-out forwards; }
+        .delay-1 { animation-delay: .1s; } .delay-2 { animation-delay: .2s; } .delay-3 { animation-delay: .3s; } .delay-4 { animation-delay: .4s; }
+        .delay-5 { animation-delay: .5s; } .delay-6 { animation-delay: .6s; }
         .progress-bar { animation: slideRight 1.5s ease-out forwards; }
         .glass { background: rgba(255,255,255,.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.1); }
         .hero-glow { box-shadow: 0 0 80px rgba(139,92,246,.3); }
@@ -101,8 +107,26 @@ export default function EconomizzeiPage() {
         ::-webkit-scrollbar-thumb { background: ${COLOR}40; border-radius: 2px; }
       `}</style>
 
+      {/* ====== STICKY LICENSE BAR ====== */}
+      <div className="sticky top-0 z-50 border-b border-white/10" style={{ background: 'rgba(15,10,26,0.95)', backdropFilter: 'blur(12px)' }}>
+        <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-2.5">
+          <span className="text-xs md:text-sm text-zinc-300">
+            <span className="font-bold text-white">{SOLD_LICENSES}</span> de {TOTAL_LICENSES} licenças vendidas
+          </span>
+          <span className="text-xs md:text-sm font-semibold animate-pulse-slow" style={{ color: COLOR }}>
+            ⚡ Restam {REMAINING}
+          </span>
+          <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: COLOR }}>
+            {PRICE_PROMO}
+          </a>
+        </div>
+        <div className="h-0.5 bg-zinc-800">
+          <div className="h-full transition-all duration-1000" style={{ width: `${SOLD_LICENSES}%`, background: `linear-gradient(90deg, ${COLOR}, #06B6D4)` }} />
+        </div>
+      </div>
+
       {/* ====== FLOATING CTA MOBILE ====== */}
-      <div id="floating-btn" className={`${showFloatingCTA ? 'visible' : ''} fixed bottom-0 left-0 right-0 z-50 p-3 glass md:hidden`}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-3 glass md:hidden">
         <a href={CHECKOUT} target="_blank" rel="noopener noreferrer"
           onClick={() => trackEvent('FloatingCTA')}
           className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white shadow-lg active:scale-[.98]"
@@ -227,8 +251,8 @@ export default function EconomizzeiPage() {
               { icon: '😰', text: 'Ansiedade e estresse por falta de controle' },
               { icon: '📉', text: 'Perde oportunidades por falta de organização' },
             ].map((problem, i) => (
-              <div key={i} className="glass rounded-2xl p-5 flex items-start gap-3 animate-fade-in delay-1">
-                <span className="text-2xl shrink-0">{problem.icon}</span>
+              <div key={i} className="glass rounded-2xl p-5 flex items-start gap-3 animate-bounce-in" style={{animationDelay: `${i * 0.1}s`}}>
+                <span className="text-2xl shrink-0 animate-float" style={{animationDelay: `${i * 0.3}s`}}>{problem.icon}</span>
                 <p className="text-sm text-zinc-300 leading-relaxed">{problem.text}</p>
               </div>
             ))}
@@ -416,24 +440,38 @@ export default function EconomizzeiPage() {
 
       {/* ====== 11. DEPOIMENTOS ====== */}
       <section className="px-4 py-16">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">Quem usa recomenda</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-3">Mais de 3.200 pessoas já transformaram suas finanças</h2>
+          <p className="text-sm text-zinc-400 text-center mb-10">Veja o que estão falando sobre o {APP_NAME}</p>
+          
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
             {[
-              { name: 'Ana S.', role: 'Autônoma', text: 'Finalmente sei para onde vai meu dinheiro. O app é incrível!' },
-              { name: 'Carlos M.', role: 'MEI', text: 'Consigo controlar meu negócio e minhas contas pessoais no mesmo lugar.' },
-              { name: 'Juliana R.', role: 'Estudante', text: 'Organizei minhas finanças e já estou economizando para minha meta.' },
+              { name: 'Mariana Silva', role: 'Empresária', photo: '44', text: 'Eu misturava tudo, não sabia o lucro da minha loja. Com o ECONOMIZZEI agora eu vejo tudo separadinho: pessoal de um lado, empresa do outro. Minha vida mudou!' },
+              { name: 'Rafael Oliveira', role: 'MEI - Lanchonete', photo: '12', text: 'Achava que aplicativo de finanças era coisa de rico. Paguei 67 reais e em 1 mês já economizei mais de 300 só organizando meus gastos. Melhor investimento do ano.' },
+              { name: 'Camila Santos', role: 'Autônoma', photo: '5', text: 'Sou manicure e não tinha controle nenhum. Agora sei exatamente quanto entra, quanto sai e quanto sobra. Estou conseguindo juntar dinheiro pela primeira vez!' },
+              { name: 'João Pedro Costa', role: 'Estudante', photo: '53', text: 'Minha mãe que me indicou. No começo achei que não ia usar, mas agora entro todo dia. Me ajudou a controlar a mesada e a economizar pra minha formatura.' },
+              { name: 'Fernanda Lima', role: 'Dentista', photo: '23', text: 'Atendo vários pacientes por dia e nunca sabia meu faturamento real. O ECONOMIZZEI me deu clareza total. Hoje sei meu ticket médio, custos e lucro líquido.' },
+              { name: 'Lucas Almeida', role: 'Motorista de App', photo: '65', text: 'Rodo o dia todo e anotava os ganhos no papel. Agora registro tudo no app em segundos. No fim do mês já sei quanto lucrei, sem dor de cabeça.' },
+              { name: 'Patrícia Nunes', role: 'Advogada', photo: '26', text: 'Tinha medo de planilhas. O ECONOMIZZEI é tão simples que minha filha de 12 anos também usa. Controlei minhas contas e ainda montei uma reserva de emergência.' },
+              { name: 'Bruno Carvalho', role: 'Personal Trainer', photo: '33', text: 'Meus alunos pagam em datas diferentes e eu sempre me perdia. Agora tenho a lista de quem pagou e quem está devendo. Organização total, zero estresse.' },
+              { name: 'Amanda Rocha', role: 'Dona de Casa', photo: '48', text: 'Meu marido e eu brigávamos por dinheiro. Começamos a usar o ECONOMIZZEI juntos e agora temos metas como casal. Nossa relação melhorou muito!' },
+              { name: 'Thiago Martins', role: 'Pequeno Empreendedor', photo: '60', text: 'Já testei 4 apps de finanças. O ECONOMIZZEI foi o único que realmente me atendeu tanto no pessoal quanto no meu negócio de camisetas. Indico pra todo mundo.' },
             ].map((d, i) => (
-              <div key={i} className="glass rounded-2xl p-5 animate-fade-in">
+              <div key={i} className="glass rounded-2xl p-5 animate-fade-in" style={{animationDelay: `${i * 0.1}s`}}>
                 <div className="flex gap-1 mb-2">{Array(5).fill(0).map((_, j) => <Star key={j} size={12} fill="#F59E0B" color="#F59E0B" />)}</div>
-                <p className="text-xs text-zinc-300 leading-relaxed mb-3">{d.text}</p>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: COLOR }}>{d.name[0]}</div>
-                  <div><p className="text-xs font-medium text-white">{d.name}</p><p className="text-[10px] text-zinc-500">{d.role}</p></div>
+                <p className="text-xs text-zinc-300 leading-relaxed mb-3">&ldquo;{d.text}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <img src={`https://i.pravatar.cc/80?img=${d.photo}`} alt={d.name} className="w-10 h-10 rounded-full object-cover border-2 border-white/10" />
+                  <div>
+                    <p className="text-xs font-semibold text-white">{d.name}</p>
+                    <p className="text-[10px] text-zinc-500">{d.role}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+
+          <p className="text-center mt-6 text-xs text-zinc-600">⭐ Média de 4.9 estrelas em mais de 500 avaliações</p>
         </div>
       </section>
 
