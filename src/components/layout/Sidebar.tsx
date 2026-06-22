@@ -8,7 +8,7 @@ import {
   TrendingUp, CreditCard, Building2, ChevronLeft, ChevronRight,
   DollarSign, Truck, RefreshCw, Shield, MessageSquare
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/AuthContext'
 
 const links = [
@@ -44,6 +44,18 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
+  const [unread, setUnread] = useState(0)
+
+  useEffect(() => {
+    if (isAdmin) {
+      const check = () => {
+        fetch('/api/admin/stats/messages').then(r => r.json()).then(d => setUnread(d.unread || 0))
+      }
+      check()
+      const interval = setInterval(check, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [isAdmin])
 
   return (
     <aside className={`hidden md:flex flex-col bg-white border-r border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
@@ -76,11 +88,16 @@ export default function Sidebar() {
           const active = pathname === link.href || pathname.startsWith(link.href + '/')
           return (
             <Link key={link.href} href={link.href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors relative ${
                 active ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
               }`}>
               <Icon size={20} />
               {!collapsed && <span>{link.label}</span>}
+              {link.href === '/admin/mensagens' && unread > 0 && (
+                <span className={`absolute ${collapsed ? '-top-1 -right-1' : 'right-2'} flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white`}>
+                  {unread}
+                </span>
+              )}
             </Link>
           )
         })}

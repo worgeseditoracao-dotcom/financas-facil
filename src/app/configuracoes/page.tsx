@@ -64,11 +64,14 @@ function SupportMessages() {
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [showChat, setShowChat] = useState(false)
+  const [hasReply, setHasReply] = useState(false)
 
   const loadMessages = async () => {
     const res = await fetch('/api/messages')
     const data = await res.json()
-    setMessages(data.messages || [])
+    const msgs = data.messages || []
+    setMessages(msgs)
+    setHasReply(msgs.some((m: any) => m.reply && !m.to_admin))
   }
 
   useEffect(() => { loadMessages() }, [])
@@ -91,9 +94,15 @@ function SupportMessages() {
   if (!showChat) {
     return (
       <div className="mt-4">
-        <button onClick={() => setShowChat(true)} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600">
+        <button onClick={() => setShowChat(true)} className="relative rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600">
           💬 Falar com o Suporte
+          {hasReply && (
+            <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white animate-pulse">
+              !
+            </span>
+          )}
         </button>
+        {hasReply && <p className="mt-1 text-xs text-emerald-600">Você tem uma nova resposta!</p>}
       </div>
     )
   }
