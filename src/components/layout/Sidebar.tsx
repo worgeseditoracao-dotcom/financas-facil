@@ -6,9 +6,10 @@ import {
   LayoutDashboard, User, Briefcase, Tags, BarChart3, Settings,
   Target, Users, FileText, Lightbulb, CalendarRange,
   TrendingUp, CreditCard, Building2, ChevronLeft, ChevronRight,
-  DollarSign, Truck, RefreshCw
+  DollarSign, Truck, RefreshCw, Shield, MessageSquare
 } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '@/lib/AuthContext'
 
 const links = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -29,17 +30,28 @@ const links = [
   { href: '/configuracoes', label: 'Config', icon: Settings },
 ]
 
+const adminLinks = [
+  { href: '/admin', label: 'Painel Admin', icon: Shield },
+  { href: '/admin/mensagens', label: 'Mensagens', icon: MessageSquare },
+]
+
+const userLinks = [
+  { href: '/configuracoes', label: 'Suporte / Fale Conosco', icon: MessageSquare },
+]
+
 export default function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
 
   return (
-    <aside className={`hidden md:flex flex-col bg-white border-r border-zinc-200 transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
-      <div className="flex h-14 items-center justify-between px-4 border-b border-zinc-200">
+    <aside className={`hidden md:flex flex-col bg-white border-r border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
+      <div className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
         {!collapsed && (
-          <span className="text-lg font-bold" style={{ color: 'var(--accent)' }}>Finanças</span>
+          <span className="text-lg font-bold text-emerald-500">{isAdmin ? 'Admin' : 'Finanças'}</span>
         )}
-        <button onClick={() => setCollapsed(!collapsed)} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100">
+        <button onClick={() => setCollapsed(!collapsed)} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
@@ -50,12 +62,23 @@ export default function Sidebar() {
           return (
             <Link key={link.href} href={link.href}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? 'text-white'
-                  : 'text-zinc-500 hover:bg-zinc-100'
-              }`}
-              style={active ? { backgroundColor: 'var(--accent)', color: '#fff' } : {}}
-            >
+                active ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              }`}>
+              <Icon size={20} />
+              {!collapsed && <span>{link.label}</span>}
+            </Link>
+          )
+        })}
+
+        {/* Admin links */}
+        {isAdmin && adminLinks.map(link => {
+          const Icon = link.icon
+          const active = pathname === link.href || pathname.startsWith(link.href + '/')
+          return (
+            <Link key={link.href} href={link.href}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                active ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              }`}>
               <Icon size={20} />
               {!collapsed && <span>{link.label}</span>}
             </Link>

@@ -5,7 +5,7 @@ import { useStore } from '@/lib/store'
 import { useAuth } from '@/lib/AuthContext'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { Download, Trash2, Palette, ShieldOff } from 'lucide-react'
+import { Download, Trash2, Palette, ShieldOff, MessageSquare, Send } from 'lucide-react'
 import { exportToExcel, exportToPDF, exportToCSV } from '@/lib/export'
 import { ACCENT_COLORS } from '@/lib/constants'
 
@@ -56,6 +56,42 @@ function CancelAccount() {
   )
 }
 
+function SupportMessages() {
+  const [message, setMessage] = useState('')
+  const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  const handleSend = async () => {
+    if (!message.trim()) return
+    setSending(true)
+    await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    })
+    setMessage('')
+    setSent(true)
+    setSending(false)
+    setTimeout(() => setSent(false), 3000)
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      <textarea
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        placeholder="Escreva sua mensagem aqui..."
+        className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm h-24 resize-none focus:border-emerald-500 focus:outline-none"
+      />
+      <button onClick={handleSend} disabled={sending || !message.trim()}
+        className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50">
+        <Send size={14} /> {sending ? 'Enviando...' : sent ? 'Enviado!' : 'Enviar Mensagem'}
+      </button>
+      {sent && <p className="text-sm text-emerald-600">Mensagem enviada! O admin responderá em breve.</p>}
+    </div>
+  )
+}
+
 export default function Settings() {
   const { state, deleteTransaction, updateSettings } = useStore()
   const { user } = useAuth()
@@ -99,6 +135,11 @@ export default function Settings() {
           <Button variant="secondary" onClick={handleExportPDF}><Download size={16} /> PDF</Button>
           <Button variant="secondary" onClick={() => exportToCSV(state.transactions)}><Download size={16} /> CSV</Button>
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50"><MessageSquare size={18} className="inline mr-1" /> Suporte / Fale Conosco</h2>
+        <SupportMessages />
       </div>
 
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
