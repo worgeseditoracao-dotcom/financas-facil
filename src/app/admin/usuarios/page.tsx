@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Trash2, Shield, ShieldOff, UserPlus } from 'lucide-react'
+import { Search, Trash2, Shield, ShieldOff, UserPlus, Undo2 } from 'lucide-react'
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<any[]>([])
@@ -24,6 +24,16 @@ export default function AdminUsers() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, updates }),
+    })
+    loadUsers()
+  }
+
+  const handleRefund = async (email: string) => {
+    if (!confirm(`Reembolsar e bloquear ${email}?`)) return
+    await fetch('/api/admin/refund', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     })
     loadUsers()
   }
@@ -101,9 +111,14 @@ export default function AdminUsers() {
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1">
                     {u.access_status === 'active' ? (
-                      <button onClick={() => handleAction(u.email, { access_status: 'blocked', blocked_reason: 'admin' })} className="rounded-lg p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-500" title="Bloquear">
-                        <ShieldOff size={14} />
-                      </button>
+                      <>
+                        <button onClick={() => handleRefund(u.email)} className="rounded-lg p-1.5 text-zinc-400 hover:bg-amber-50 hover:text-amber-500" title="Reembolsar">
+                          <Undo2 size={14} />
+                        </button>
+                        <button onClick={() => handleAction(u.email, { access_status: 'blocked', blocked_reason: 'admin' })} className="rounded-lg p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-500" title="Bloquear">
+                          <ShieldOff size={14} />
+                        </button>
+                      </>
                     ) : (
                       <button onClick={() => handleAction(u.email, { access_status: 'active', blocked_reason: null })} className="rounded-lg p-1.5 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-500" title="Ativar">
                         <Shield size={14} />
