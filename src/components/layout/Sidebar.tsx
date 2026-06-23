@@ -27,6 +27,8 @@ const links = [
   { href: '/categorias', label: 'Categorias', icon: Tags },
   { href: '/insights', label: 'Insights', icon: Lightbulb },
   { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { href: '/empresas', label: 'Empresas', icon: Building2 },
+  { href: '/insights-tips', label: 'Insights', icon: Lightbulb },
   { href: '/configuracoes', label: 'Config', icon: Settings },
 ]
 
