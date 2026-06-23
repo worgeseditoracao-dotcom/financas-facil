@@ -113,12 +113,17 @@ export default function EconomizzeiPage() {
           <span className="text-xs md:text-sm text-zinc-300">
             <span className="font-bold text-white">{SOLD_LICENSES}</span> de {TOTAL_LICENSES} licenças vendidas
           </span>
-          <span className="text-xs md:text-sm font-semibold animate-pulse-slow" style={{ color: COLOR }}>
+          <span className="text-xs md:text-sm font-semibold animate-pulse-slow hidden sm:inline" style={{ color: COLOR }}>
             ⚡ Restam {REMAINING}
           </span>
-          <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: COLOR }}>
-            {PRICE_PROMO}
-          </a>
+          <div className="flex items-center gap-2">
+            <a href="/login" className="text-xs md:text-sm font-medium text-zinc-400 hover:text-white px-2 py-1">
+              Já comprei / Entrar
+            </a>
+            <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: COLOR }}>
+              {PRICE_PROMO}
+            </a>
+          </div>
         </div>
         <div className="h-0.5 bg-zinc-800">
           <div className="h-full transition-all duration-1000" style={{ width: `${SOLD_LICENSES}%`, background: `linear-gradient(90deg, ${COLOR}, #06B6D4)` }} />
