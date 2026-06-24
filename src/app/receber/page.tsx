@@ -167,12 +167,15 @@ function ReceivableForm({ receivable, clients, onSave, onClose }: {
   onSave: (data: Omit<Receivable, 'id' | 'createdAt'>) => void
   onClose: () => void
 }) {
+  const { state } = useStore()
   const [name, setName] = useState(receivable?.name || '')
   const [value, setValue] = useState(receivable ? String(receivable.value) : '')
   const [dueDate, setDueDate] = useState(receivable?.dueDate || '')
   const [category, setCategory] = useState(receivable?.category || 'Serviços')
   const [type, setType] = useState<'receivable' | 'installment' | 'invoice'>(receivable?.type || 'receivable')
   const [recurring, setRecurring] = useState(receivable?.recurring || false)
+  const [frequency, setFrequency] = useState<'weekly' | 'monthly' | 'yearly'>(receivable?.frequency || 'monthly')
+  const [accountId, setAccountId] = useState(receivable?.accountId || '')
   const [module, setModule] = useState<'personal' | 'business'>(receivable?.module || 'business')
   const [clientId, setClientId] = useState(receivable?.clientId || '')
   const [totalInstallments, setTotalInstallments] = useState(receivable?.installment?.total ? String(receivable.installment.total) : '')
@@ -183,7 +186,7 @@ function ReceivableForm({ receivable, clients, onSave, onClose }: {
     if (!name || !value || !dueDate) return
     onSave({
       name: name.trim(), value: Math.abs(parseFloat(value)), dueDate, category,
-      received: false, recurring, type,
+      received: false, recurring, frequency: recurring ? frequency : undefined, accountId: accountId || undefined, type,
       clientId: clientId || undefined,
       module,
       installment: type === 'installment' && totalInstallments ? { total: parseInt(totalInstallments), current: parseInt(currentInstallment) || 1 } : undefined,
@@ -240,6 +243,34 @@ function ReceivableForm({ receivable, clients, onSave, onClose }: {
           <input type="checkbox" checked={recurring} onChange={e => setRecurring(e.target.checked)} className="h-4 w-4 rounded border-zinc-200 text-emerald-500" />
           Recorrente
         </label>
+        {recurring && (
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1.5 flex-1">
+              <label className="text-xs font-medium text-zinc-500">Frequência</label>
+              <select value={frequency} onChange={e => setFrequency(e.target.value as any)}
+                className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900">
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensal</option>
+                <option value="yearly">Anual</option>
+              </select>
+            </div>
+          </div>
+        )}
+        {state.bankAccounts.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-zinc-500">Conta Bancária (opcional)</label>
+            <select value={accountId} onChange={e => setAccountId(e.target.value)}
+              className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900">
+              <option value="">Sem conta</option>
+              {state.bankAccounts.map(a => <option key={a.id} value={a.id}>{a.bank} - {a.name}</option>)}
+            </select>
+          </div>
+        )}
+        {type === 'invoice' && (
+          <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+            <p className="text-xs text-blue-600">📄 Fatura: ao salvar, será possível gerar o PDF da fatura com os dados do cliente.</p>
+          </div>
+        )}
         <div className="flex gap-3 pt-2">
           <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancelar</Button>
           <Button type="submit" className="flex-1">{receivable ? 'Salvar' : 'Adicionar'}</Button>

@@ -142,6 +142,10 @@ export interface Bill {
   paid: boolean
   paidDate?: string
   recurring: boolean
+  frequency?: 'weekly' | 'monthly' | 'yearly'
+  endDate?: string
+  isGenerated?: boolean
+  accountId?: string
   module: 'personal' | 'business'
   type: 'bill' | 'financing' | 'installment' | 'card' | 'advance'
   installment?: { total: number; current: number }
@@ -162,6 +166,10 @@ export interface Receivable {
   received: boolean
   receivedDate?: string
   recurring: boolean
+  frequency?: 'weekly' | 'monthly' | 'yearly'
+  endDate?: string
+  isGenerated?: boolean
+  accountId?: string
   module: 'personal' | 'business'
   type: 'receivable' | 'installment' | 'invoice'
   installment?: { total: number; current: number }

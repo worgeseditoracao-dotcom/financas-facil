@@ -356,6 +356,8 @@ function BillForm({ bill, creditCards, onSave, onClose }: {
   const [category, setCategory] = useState(bill?.category || 'Água')
   const [type, setType] = useState(bill?.type || 'bill')
   const [recurring, setRecurring] = useState(bill?.recurring || false)
+  const [frequency, setFrequency] = useState<'weekly' | 'monthly' | 'yearly'>(bill?.frequency || 'monthly')
+  const [accountId, setAccountId] = useState(bill?.accountId || '')
   const [module, setModule] = useState<'personal' | 'business'>(bill?.module || 'personal')
   const [totalInstallments, setTotalInstallments] = useState(bill?.installment?.total ? String(bill.installment.total) : '')
   const [currentInstallment, setCurrentInstallment] = useState(bill?.installment?.current ? String(bill.installment.current) : '')
@@ -366,7 +368,7 @@ function BillForm({ bill, creditCards, onSave, onClose }: {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !value || !dueDate) return
-    onSave({ name: name.trim(), value: Math.abs(parseFloat(value)), dueDate, category, paid: false, recurring, type: type as Bill['type'], module,
+    onSave({ name: name.trim(), value: Math.abs(parseFloat(value)), dueDate, category, paid: false, recurring, frequency: recurring ? frequency : undefined, accountId: accountId || undefined, type: type as Bill['type'], module,
       installment: type === 'installment' && totalInstallments ? { total: parseInt(totalInstallments), current: parseInt(currentInstallment) || 1 } : undefined,
       financing: type === 'financing' && financingTotal ? { total: Math.abs(parseFloat(financingTotal)), paid: Math.abs(parseFloat(financingPaid) || 0), rate: 0 } : undefined,
       supplierId: supplierId || undefined,
@@ -426,6 +428,29 @@ function BillForm({ bill, creditCards, onSave, onClose }: {
           <input type="checkbox" checked={recurring} onChange={e => setRecurring(e.target.checked)} className="h-4 w-4 rounded border-zinc-200 text-emerald-500" />
           Recorrente
         </label>
+        {recurring && (
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1.5 flex-1">
+              <label className="text-xs font-medium text-zinc-500">Frequência</label>
+              <select value={frequency} onChange={e => setFrequency(e.target.value as any)}
+                className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900">
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensal</option>
+                <option value="yearly">Anual</option>
+              </select>
+            </div>
+          </div>
+        )}
+        {state.bankAccounts.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-zinc-500">Conta Bancária (opcional)</label>
+            <select value={accountId} onChange={e => setAccountId(e.target.value)}
+              className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900">
+              <option value="">Sem conta</option>
+              {state.bankAccounts.map(a => <option key={a.id} value={a.id}>{a.bank} - {a.name}</option>)}
+            </select>
+          </div>
+        )}
         <div className="flex gap-3 pt-2">
           <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancelar</Button>
           <Button type="submit" className="flex-1">{bill ? 'Salvar' : 'Adicionar'}</Button>
