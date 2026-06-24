@@ -29,6 +29,7 @@ const links = [
   { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/empresas', label: 'Empresas', icon: Building2 },
   { href: '/insights-tips', label: 'Insights', icon: Lightbulb },
+  { href: '/importar', label: 'Importar', icon: FileText },
   { href: '/configuracoes', label: 'Config', icon: Settings },
 ]
 

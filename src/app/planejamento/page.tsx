@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { CalendarRange, TrendingUp, TrendingDown, AlertTriangle, Briefcase, User, BarChart3, PiggyBank } from 'lucide-react'
+import { CalendarRange, TrendingUp, TrendingDown, AlertTriangle, Briefcase, User, BarChart3, PiggyBank, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { calculateIncome, calculateExpenses, filterTransactionsByPeriod, filterTransactionsByModule, formatCurrency, groupByCategory } from '@/lib/utils'
 
@@ -11,17 +11,25 @@ export default function Planning() {
   const { state, setBudget } = useStore()
   const { transactions, budgets, personalCategories, businessCategories } = state
   const [tab, setTab] = useState<'personal' | 'business'>('personal')
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth()) // 0-11
+  const [viewYear, setViewYear] = useState(new Date().getFullYear())
 
-  const now = new Date()
+  const now = new Date(viewYear, viewMonth, 1)
   const currentMonth = now.getMonth() + 1
   const currentYear = now.getFullYear()
   const monthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`
+  const isCurrentMonth = now.getMonth() === new Date().getMonth() && now.getFullYear() === new Date().getFullYear()
 
   const currentBudget = budgets.find(b => b.month === monthKey && b.module === tab)
   const categories = tab === 'personal' ? personalCategories : businessCategories
 
   const moduleTransactions = useMemo(() => filterTransactionsByModule(transactions, tab), [transactions, tab])
-  const monthlyTransactions = useMemo(() => filterTransactionsByPeriod(moduleTransactions, 'month'), [moduleTransactions])
+  const monthlyTransactions = useMemo(() => {
+    const start = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`
+    const endDay = new Date(currentYear, currentMonth, 0).getDate()
+    const end = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`
+    return moduleTransactions.filter(t => t.date >= start && t.date <= end)
+  }, [moduleTransactions, currentYear, currentMonth])
 
   const actualIncome = calculateIncome(monthlyTransactions)
   const actualExpenses = calculateExpenses(monthlyTransactions)
@@ -68,9 +76,27 @@ export default function Planning() {
 
   return (
     <div className="space-y-6 animate-in max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Planejamento Mensal</h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{months[currentMonth - 1]} de {currentYear}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Planejamento Mensal</h1>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{months[currentMonth - 1]} de {currentYear}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1) } else setViewMonth(viewMonth - 1) }}
+            className="rounded-xl p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+            <ChevronLeft size={18} />
+          </button>
+          {isCurrentMonth ? (
+            <span className="text-xs font-medium text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg">Atual</span>
+          ) : (
+            <button onClick={() => { setViewMonth(new Date().getMonth()); setViewYear(new Date().getFullYear()) }}
+              className="text-xs text-zinc-500 hover:text-emerald-500 px-2 py-1">Hoje</button>
+          )}
+          <button onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1) } else setViewMonth(viewMonth + 1) }}
+            className="rounded-xl p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2">

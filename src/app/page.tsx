@@ -3,7 +3,8 @@
 import { useStore } from '@/lib/store'
 import { calculateBalance, calculateIncome, calculateExpenses, filterTransactionsByPeriod, filterTransactionsByModule, formatCurrency } from '@/lib/utils'
 import { useMemo } from 'react'
-import { Wallet, ArrowUpRight, ArrowDownRight, PiggyBank, TrendingUp, BarChart3, Target, DollarSign, AlertTriangle, CalendarDays, ArrowRight, TrendingDown } from 'lucide-react'
+import { Wallet, ArrowUpRight, ArrowDownRight, PiggyBank, TrendingUp, BarChart3, Target, DollarSign, AlertTriangle, CalendarDays, ArrowRight, TrendingDown, Clock } from 'lucide-react'
+import { format, addMonths } from 'date-fns'
 import StatCard from '@/components/dashboard/StatCard'
 import IncomeExpenseChart from '@/components/dashboard/IncomeExpenseChart'
 import CategoryPieChart from '@/components/dashboard/CategoryPieChart'
@@ -225,6 +226,51 @@ export default function Dashboard() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Fluxo de Caixa Projetado (3 meses) */}
+      <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Clock size={18} className="text-purple-500" />
+          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Projeção 3 Meses</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[0, 1, 2].map(i => {
+            const month = addMonths(new Date(), i)
+            const monthLabel = format(month, 'MMM/yy')
+            const monthStart = format(new Date(month.getFullYear(), month.getMonth(), 1), 'yyyy-MM-dd')
+            const monthEnd = format(new Date(month.getFullYear(), month.getMonth() + 1, 0), 'yyyy-MM-dd')
+            const monthBills = bills.filter(b => !b.paid && b.dueDate >= monthStart && b.dueDate <= monthEnd).reduce((a, b) => a + b.value, 0)
+            const monthReceivables = receivables.filter(r => !r.received && r.dueDate >= monthStart && r.dueDate <= monthEnd).reduce((a, r) => a + r.value, 0)
+            const projected = bankTotal + monthReceivables - monthBills
+            const recurringBills = bills.filter(b => b.recurring && !b.paid).reduce((a, b) => a + b.value, 0)
+            return (
+              <div key={i} className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-4">
+                <p className="text-[10px] font-medium text-zinc-500 uppercase">{monthLabel}</p>
+                <div className="mt-2 space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-500">A Receber</span>
+                    <span className="text-emerald-500 font-medium">{fmt(monthReceivables)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-500">A Pagar</span>
+                    <span className="text-red-500 font-medium">{fmt(monthBills)}</span>
+                  </div>
+                  {recurringBills > 0 && (
+                    <div className="flex justify-between text-[10px]">
+                      <span className="text-zinc-400">Recorrentes</span>
+                      <span className="text-zinc-400">{fmt(recurringBills)}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-zinc-200 dark:border-zinc-700 pt-1.5 flex justify-between text-sm">
+                    <span className="font-medium text-zinc-700 dark:text-zinc-300">Projetado</span>
+                    <span className={`font-bold ${projected >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>{fmt(projected)}</span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
