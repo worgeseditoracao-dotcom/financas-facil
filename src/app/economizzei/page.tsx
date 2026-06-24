@@ -34,14 +34,14 @@ const TOTAL_MODULOS = modulos.reduce((a, m) => a + parseFloat(m.price), 0)
 
 function track(n: string) { try { (window as any).fbq?.('trackCustom', n) } catch {} }
 
-function Btn({ kids, big, full }: { kids: React.ReactNode; big?: boolean; full?: boolean }) {
+function Btn({ children, big, full }: { children: React.ReactNode; big?: boolean; full?: boolean }) {
   return <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" onClick={() => track('CTA')}
     className={`inline-flex items-center justify-center gap-2 rounded-2xl font-bold text-white shadow-xl transition-all duration-300 hover:scale-[1.03] active:scale-[.97] hover:shadow-2xl ${big ? 'px-10 py-5 text-lg' : 'px-6 py-3.5 text-sm'} ${full ? 'w-full' : ''}`}
-    style={{ background: `linear-gradient(135deg, ${COLOR}, #7C3AED)` }}>{kids}</a>
+    style={{ background: `linear-gradient(135deg, ${COLOR}, #7C3AED)` }}>{children}</a>
 }
 
-function Badge({ kids, clr = CYAN }: { kids: React.ReactNode; clr?: string }) {
-  return <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] md:text-xs font-medium border" style={{ borderColor: clr + '40', background: clr + '15', color: clr }}>{kids}</div>
+function Badge({ children, clr = CYAN }: { children: React.ReactNode; clr?: string }) {
+  return <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] md:text-xs font-medium border" style={{ borderColor: clr + '40', background: clr + '15', color: clr }}>{children}</div>
 }
 
 function SectionHead({ kids, sub }: { kids: React.ReactNode; sub?: string }) {
