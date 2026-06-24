@@ -8,7 +8,7 @@ const PROTECTED_PREFIXES = [
   '/cartoes', '/insights',
 ]
 
-const PUBLIC_PREFIXES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado', '/api']
+const PUBLIC_PREFIXES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado', '/resetar-senha', '/economizzei', '/api']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

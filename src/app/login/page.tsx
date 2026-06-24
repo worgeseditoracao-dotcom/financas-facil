@@ -61,6 +61,9 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-zinc-500">
+              <a href="/resetar-senha" className="font-medium text-emerald-500 hover:text-emerald-600">Esqueci minha senha</a>
+            </p>
+            <p className="mt-2 text-sm text-zinc-500">
               Ainda não tem acesso?{' '}
               <a href="/vendas" className="font-medium text-emerald-500 hover:text-emerald-600">Comprar acesso</a>
             </p>

@@ -22,7 +22,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-export const PUBLIC_ROUTES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado']
+export const PUBLIC_ROUTES = ['/vendas', '/login', '/primeiro-acesso', '/acesso-bloqueado', '/resetar-senha', '/economizzei']
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
