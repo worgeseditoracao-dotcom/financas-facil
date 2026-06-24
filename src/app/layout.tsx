@@ -30,7 +30,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex bg-white">
+      <body className="min-h-full flex bg-white overflow-x-hidden">
         <StoreProvider>
           <AuthGuard>{children}</AuthGuard>
         </StoreProvider>

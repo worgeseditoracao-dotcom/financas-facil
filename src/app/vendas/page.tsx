@@ -115,7 +115,7 @@ export default function VendasPage() {
   ]
 
   return (
-    <div className="min-h-screen font-sans scroll-smooth overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0A0614 0%, #100B20 50%, #0A0614 100%)', color: '#fff' }}>
+    <div className="w-full min-h-screen font-sans scroll-smooth overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0A0614 0%, #100B20 50%, #0A0614 100%)', color: '#fff' }}>
       <style>{`
         @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
