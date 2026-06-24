@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
       </aside>
-      <div className="flex flex-1 flex-col min-w-0 bg-zinc-50">
+      <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden bg-zinc-50">
         {/* Mobile nav */}
         <div className="md:hidden flex items-center gap-2 p-3 border-b border-zinc-200 bg-white overflow-x-auto">
           {adminLinks.map(link => {

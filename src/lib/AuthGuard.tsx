@@ -41,7 +41,7 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <>
       <Sidebar />
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden">
         <Header />
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {children}
