@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
   const orderId = data.id || payload.transaction_id || payload.id || ''
   const email = (data.customer?.email || payload.customer?.email || payload.buyer?.email || '').toLowerCase().trim()
   const name = data.customer?.name || payload.customer?.name || payload.buyer?.name || email
-  const productName = data.product?.name || payload.product_name || 'Finanças Fácil'
+  const productName = data.product?.name || payload.product_name || 'ECONOMIZZEI'
   const amount = Number(data.amount || payload.amount || 0)
   const status = data.status || payload.status || ''
 

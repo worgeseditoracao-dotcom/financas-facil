@@ -65,7 +65,7 @@ export default function Sidebar() {
     <aside className={`hidden md:flex flex-col bg-white border-r border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
       <div className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
         {!collapsed && (
-          <span className="text-lg font-bold text-emerald-500">{isAdmin ? 'Admin' : 'Finanças'}</span>
+          <span className="text-lg font-bold text-emerald-500">{isAdmin ? 'Admin' : 'ECONOMIZZEI'}</span>
         )}
         <button onClick={() => setCollapsed(!collapsed)} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}

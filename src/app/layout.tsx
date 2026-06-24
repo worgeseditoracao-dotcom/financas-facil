@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Finanças Fácil",
+  title: "ECONOMIZZEI",
   description: "Sistema de gestão financeira completo",
 }
 

@@ -47,7 +47,7 @@ export default function Header() {
           >
             <Menu size={20} />
           </button>
-          <span className="text-lg font-bold text-emerald-500">Finanças</span>
+          <span className="text-lg font-bold text-emerald-500">ECONOMIZZEI</span>
         </div>
         <div className="flex items-center gap-2">
           {user && (
@@ -81,7 +81,7 @@ export default function Header() {
           <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-zinc-900 shadow-2xl overflow-y-auto">
             <div className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
-              <span className="text-lg font-bold text-emerald-500">Finanças</span>
+              <span className="text-lg font-bold text-emerald-500">ECONOMIZZEI</span>
               <button onClick={() => setMenuOpen(false)} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                 <X size={20} />
               </button>

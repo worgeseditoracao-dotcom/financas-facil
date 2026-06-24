@@ -16,14 +16,14 @@ export function exportToExcel(transactions: Transaction[], filename: string = 'f
   }))
   const ws = XLSX.utils.json_to_sheet(data)
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Finanças')
+  XLSX.utils.book_append_sheet(wb, ws, 'ECONOMIZZEI')
   XLSX.writeFile(wb, `${filename}.xlsx`)
 }
 
-export function exportToPDF(transactions: Transaction[], filename: string = 'financas-facil') {
+export function exportToPDF(transactions: Transaction[], filename: string = 'economizzei') {
   const doc = new jsPDF()
   doc.setFontSize(18)
-  doc.text('Finanças Fácil', 14, 22)
+  doc.text('ECONOMIZZEI', 14, 22)
   doc.setFontSize(10)
   doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30)
 
