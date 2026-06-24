@@ -5,6 +5,7 @@ import { Upload, CheckCircle2, XCircle, AlertTriangle, Search, Trash2, RefreshCw
 import { useStore } from '@/lib/store'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { StatementEntry, Transaction } from '@/lib/types'
+import { parseOFX, isOFX } from '@/lib/ofx'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
@@ -33,8 +34,50 @@ export default function Conciliacao() {
     const file = e.target.files?.[0]
     if (!file) return
     const text = await file.text()
+
+    // OFX detection
+    if (isOFX(text)) {
+      const { bank, transactions: ofxTrans } = parseOFX(text)
+      if (ofxTrans.length === 0) { alert('Nenhuma transação encontrada no arquivo OFX'); return }
+
+      const parsed: Omit<StatementEntry, 'id'>[] = []
+      const lowerStmts = text.toLowerCase()
+
+      for (const t of ofxTrans) {
+        const descriptionLower = t.description.toLowerCase()
+        const sameValueTrans = transactions.filter(tx => Math.abs(tx.value) === t.value && tx.type === t.type)
+        const match = sameValueTrans.find(tx => {
+          const txDesc = (tx.description || '').toLowerCase()
+          return txDesc.includes(descriptionLower) || descriptionLower.includes(txDesc) ||
+            txDesc.split(' ').some(w => w.length > 3 && descriptionLower.includes(w)) ||
+            descriptionLower.split(' ').some(w => w.length > 3 && txDesc.includes(w))
+        })
+
+        const entry = {
+          date: t.date,
+          description: t.description,
+          value: t.value,
+          type: t.type,
+          bank: t.bank,
+          matchedTransactionId: match?.id,
+          manuallyMatched: false,
+          ignored: false,
+          importedAt: new Date().toISOString(),
+        }
+
+        parsed.push(entry)
+      }
+
+      importStatement(parsed)
+      const matchedCount = parsed.filter(e => e.matchedTransactionId).length
+      alert(`OFX importado! ${parsed.length} transações de ${bank}. ${matchedCount} conciliadas automaticamente.`)
+      if (fileRef.current) fileRef.current.value = ''
+      return
+    }
+
+    // CSV parsing (existing code)
     const lines = text.split('\n').filter(l => l.trim())
-    if (lines.length < 2) { alert('Arquivo CSV vazio ou inválido'); return }
+    if (lines.length < 2) { alert('Arquivo vazio ou inválido'); return }
 
     const header = lines[0].toLowerCase()
     const isNubank = header.includes('data') && header.includes('valor') && header.includes('descricao')
@@ -137,7 +180,7 @@ export default function Conciliacao() {
 
       {/* Upload */}
       <div className="rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 p-8 text-center">
-        <input ref={fileRef} type="file" accept=".csv,.txt" onChange={handleFile} className="hidden" />
+        <input ref={fileRef} type="file" accept=".csv,.txt,.ofx" onChange={handleFile} className="hidden" />
         <Upload size={40} className="mx-auto text-zinc-400 mb-3" />
         <p className="text-sm font-medium text-zinc-900 mb-1">Importar Extrato CSV</p>
         <p className="text-xs text-zinc-500 mb-4">Formatos suportados: Nubank, Itaú, Bradesco, ou CSV genérico (data;valor;descrição)</p>

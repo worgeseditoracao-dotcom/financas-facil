@@ -30,6 +30,7 @@ const links = [
   { href: '/empresas', label: 'Empresas', icon: Building2 },
   { href: '/insights-tips', label: 'Insights', icon: Lightbulb },
   { href: '/importar', label: 'Importar', icon: FileText },
+  { href: '/calculadora-impostos', label: 'Impostos', icon: DollarSign },
   { href: '/configuracoes', label: 'Config', icon: Settings },
 ]
 
