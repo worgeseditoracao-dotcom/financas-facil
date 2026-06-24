@@ -44,18 +44,18 @@ function Badge({ children, clr = CYAN }: { children: React.ReactNode; clr?: stri
   return <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] md:text-xs font-medium border" style={{ borderColor: clr + '40', background: clr + '15', color: clr }}>{children}</div>
 }
 
-function SectionHead({ kids, sub }: { kids: React.ReactNode; sub?: string }) {
+function SectionHead({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return <div className="text-center mb-8 md:mb-12">
-    <h2 className="text-2xl md:text-4xl font-extrabold text-white">{kids}</h2>
+    <h2 className="text-2xl md:text-4xl font-extrabold text-white">{children}</h2>
     {sub && <p className="mt-2 md:mt-3 text-sm md:text-base text-zinc-400 max-w-xl mx-auto">{sub}</p>}
   </div>
 }
 
-function Card({ kids, cls = '', stl = {}, onClick }: any) {
-  return <div className={`rounded-2xl md:rounded-3xl p-5 md:p-6 border border-white/10 ${cls}`} style={{ background: 'rgba(255,255,255,.04)', backdropFilter: 'blur(10px)', ...stl }} onClick={onClick}>{kids}</div>
+function Card({ children, cls = '', stl = {}, onClick }: any) {
+  return <div className={`rounded-2xl md:rounded-3xl p-5 md:p-6 border border-white/10 ${cls}`} style={{ background: 'rgba(255,255,255,.04)', backdropFilter: 'blur(10px)', ...stl }} onClick={onClick}>{children}</div>
 }
 
-function Reveal({ kids, cls = '' }: { kids: React.ReactNode; cls?: string }) {
+function Reveal({ children, cls = '' }: { children: React.ReactNode; cls?: string }) {
   const r = useRef<HTMLDivElement>(null)
   const [v, setV] = useState(false)
   useEffect(() => {
@@ -63,7 +63,7 @@ function Reveal({ kids, cls = '' }: { kids: React.ReactNode; cls?: string }) {
     if (r.current) o.observe(r.current)
     return () => o.disconnect()
   }, [])
-  return <div ref={r} className={`transition-all duration-700 ${v ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cls}`}>{kids}</div>
+  return <div ref={r} className={`transition-all duration-700 ${v ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cls}`}>{children}</div>
 }
 
 function CTABlock({ txt }: { txt: string }) {
