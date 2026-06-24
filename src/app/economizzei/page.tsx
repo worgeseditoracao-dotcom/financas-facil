@@ -146,7 +146,7 @@ export default function VendasPage() {
             <div className="h-1 bg-white/5 rounded-full mt-1 hidden sm:block"><div className="h-full rounded-full" style={{width:`${SOLD}%`,background:`linear-gradient(90deg,${COLOR},${CYAN})`}} /></div>
           </div>
           <div className="flex items-center gap-1.5 md:gap-3 ml-3">
-            <a href="/login" className="text-[11px] md:text-xs font-medium text-zinc-400 hover:text-white whitespace-nowrap">Já comprei</a>
+            <a href="/login" className="text-[11px] md:text-xs font-medium text-zinc-300 hover:text-white border border-zinc-600 hover:border-zinc-400 px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap">Já comprei</a>
             <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" className="rounded-xl px-3 py-1.5 md:px-4 md:py-2 text-[11px] md:text-sm font-bold text-white hover:scale-105 transition-all" style={{background:`linear-gradient(135deg,${COLOR},#7C3AED)`}}>R$ {PRICE_PROMO}</a>
           </div>
         </div>
@@ -179,6 +179,24 @@ export default function VendasPage() {
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0A0614] h-16" />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* JÁ É CLIENTE? */}
+      <section className="px-4 pb-12 -mt-8">
+        <div className="mx-auto max-w-lg text-center">
+          <div className="glass rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-left">
+              <p className="text-sm font-bold text-white">Já comprou?</p>
+              <p className="text-xs text-zinc-400">Acesse o app com seu email e senha</p>
+            </div>
+            <a href="/login" className="flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition-all hover:scale-105">
+              Fazer Login <ArrowRight size={14} />
+            </a>
+            <a href="/primeiro-acesso" className="text-xs text-zinc-500 hover:text-cyan-400 transition-colors">
+              Criar senha (1º acesso)
+            </a>
           </div>
         </div>
       </section>
@@ -422,8 +440,23 @@ export default function VendasPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/8 py-10 px-4"><div className="mx-auto max-w-4xl">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-xs md:text-sm">
+      <footer className="border-t border-white/8 py-10 px-4">
+        <div className="mx-auto max-w-4xl">
+          {/* Já é cliente no footer */}
+          <div className="glass rounded-2xl p-5 mb-8 text-center">
+            <p className="text-sm font-bold text-white">Já comprou o {APP}?</p>
+            <p className="text-xs text-zinc-400 mt-1">Seu acesso já está liberado. Faça login com o e-mail da compra.</p>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <a href="/login" className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-6 py-2.5 text-sm font-medium text-white transition-all">
+                Fazer Login <ArrowRight size={14} />
+              </a>
+              <a href="/primeiro-acesso" className="text-xs text-zinc-500 hover:text-cyan-400">
+                Criar senha
+              </a>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-xs md:text-sm">
           <div><p className="font-bold text-white mb-3">{APP}</p><p className="text-zinc-500">Sistema completo de finanças pessoais e empresariais.</p></div>
           <div><p className="font-bold text-white mb-3">Produto</p><div className="space-y-1.5 text-zinc-500"><p>Funcionalidades</p><p>Preço</p><p>Garantia</p><p>FAQ</p></div></div>
           <div><p className="font-bold text-white mb-3">Suporte</p><div className="space-y-1.5 text-zinc-500"><p>Central de Ajuda</p><p>Contato</p><p>Chat na Plataforma</p></div></div>
