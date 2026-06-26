@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Plus, Pencil, Trash2, Target, Plane, ShoppingBag, PiggyBank, GraduationCap, AlertCircle, ArrowRight, TrendingUp, CalendarDays, FileText } from 'lucide-react'
+import { Plus, Pencil, Trash2, Target, Plane, ShoppingBag, PiggyBank, GraduationCap, AlertCircle, ArrowRight, TrendingUp, CalendarDays, FileText, Upload } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { formatCurrency } from '@/lib/utils'
 import type { Goal } from '@/lib/types'
@@ -28,6 +28,16 @@ export default function Goals() {
   const [tab, setTab] = useState<'personal' | 'business'>('personal')
   const [calMonth, setCalMonth] = useState(new Date().getMonth())
   const [calYear, setCalYear] = useState(new Date().getFullYear())
+  const [addAmount, setAddAmount] = useState<Record<string, string>>({})
+
+  const handleAddToGoal = (goalId: string) => {
+    const amount = parseFloat(addAmount[goalId] || '0')
+    if (amount <= 0) return
+    const goal = state.goals.find(g => g.id === goalId)
+    if (!goal) return
+    updateGoal({ ...goal, currentValue: goal.currentValue + amount })
+    setAddAmount(prev => ({ ...prev, [goalId]: '' }))
+  }
 
   const filtered = state.goals.filter(g => g.module === tab)
   const totalTarget = filtered.reduce((a, g) => a + g.targetValue, 0)
@@ -180,7 +190,26 @@ export default function Goals() {
                 </div>
               )}
 
-              <div className="mt-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="mt-3 flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">R$</span>
+                  <input
+                    type="number" step="0.01" placeholder="Guardar..."
+                    value={addAmount[goal.id] || ''}
+                    onChange={e => setAddAmount(prev => ({ ...prev, [goal.id]: e.target.value }))}
+                    onKeyDown={e => { if (e.key === 'Enter') handleAddToGoal(goal.id) }}
+                    className="w-full h-9 rounded-xl border border-zinc-200 pl-8 pr-3 text-xs focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+                <button
+                  onClick={() => handleAddToGoal(goal.id)}
+                  disabled={!addAmount[goal.id] || parseFloat(addAmount[goal.id]) <= 0}
+                  className="shrink-0 h-9 px-3 rounded-xl bg-emerald-500 text-xs font-medium text-white hover:bg-emerald-600 disabled:opacity-40 transition-colors">
+                  <Upload size={14} className="inline mr-1" />Guardar
+                </button>
+              </div>
+
+              <div className="mt-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => setEditing(goal)} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100"><Pencil size={14} /></button>
                 <button onClick={() => deleteGoal(goal.id)} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-red-500"><Trash2 size={14} /></button>
               </div>
