@@ -15,14 +15,33 @@ export default function Dashboard() {
   const { transactions, goals, clients, bills, creditCards, receivables, bankAccounts } = state
   const fmt = (v: number) => formatCurrency(v, state.settings.currency)
 
+  const today = new Date().toISOString().split('T')[0]
+  const monthStart = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`
+  const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
+
+  // Agrega transações + contas pagas + recebimentos na receita/despesa do mês
+  const paidBillsThisMonth = useMemo(() =>
+    bills.filter(b => b.paid && b.paidDate && b.paidDate >= monthStart && b.paidDate <= monthEnd).reduce((a, b) => a + b.value, 0),
+    [bills, monthStart, monthEnd]
+  )
+  const receivedThisMonth = useMemo(() =>
+    receivables.filter(r => r.received && r.receivedDate && r.receivedDate >= monthStart && r.receivedDate <= monthEnd).reduce((a, r) => a + r.value, 0),
+    [receivables, monthStart, monthEnd]
+  )
+
+  // Transações do mês
   const monthlyTransactions = useMemo(
     () => filterTransactionsByPeriod(transactions, 'month'),
     [transactions]
   )
 
-  const allTimeBalance = calculateBalance(transactions)
-  const monthlyIncome = calculateIncome(monthlyTransactions)
-  const monthlyExpense = calculateExpenses(monthlyTransactions)
+  const txIncome = calculateIncome(monthlyTransactions)
+  const txExpense = calculateExpenses(monthlyTransactions)
+
+  // Total real: transações + recebimentos + contas pagas
+  const monthlyIncome = txIncome + receivedThisMonth
+  const monthlyExpense = txExpense + paidBillsThisMonth
+  const allTimeBalance = calculateBalance(transactions) + receivedThisMonth - paidBillsThisMonth
   const monthlySavings = monthlyIncome - monthlyExpense
   const netWorth = allTimeBalance
   const cashFlow = monthlyIncome - monthlyExpense
@@ -33,15 +52,9 @@ export default function Dashboard() {
   const totalClients = clients.length
   const activeClients = clients.filter(c => c.status === 'active').length
 
-  const today = new Date().toISOString().split('T')[0]
-  const monthEnd = new Date()
-  monthEnd.setMonth(monthEnd.getMonth() + 1)
-  monthEnd.setDate(0)
-  const monthEndStr = monthEnd.toISOString().split('T')[0]
-
   const dueMonthBills = useMemo(() =>
-    bills.filter(b => !b.paid && b.dueDate >= today && b.dueDate <= monthEndStr).sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
-    [bills, today, monthEndStr]
+    bills.filter(b => !b.paid && b.dueDate >= today && b.dueDate <= monthEnd).sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
+    [bills, today, monthEnd]
   )
 
   const overdueBills = useMemo(() =>
