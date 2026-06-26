@@ -38,6 +38,13 @@ export default function Planning() {
   const [expectedIncome, setExpectedIncome] = useState(currentBudget?.expectedIncome?.toString() || '')
   const [expectedExpenses, setExpectedExpenses] = useState(currentBudget?.expectedExpenses?.toString() || '')
 
+  // Carrega o orçamento ao trocar de aba ou mês
+  useEffect(() => {
+    const budget = budgets.find(b => b.month === monthKey && b.module === tab)
+    setExpectedIncome(budget?.expectedIncome?.toString() || '')
+    setExpectedExpenses(budget?.expectedExpenses?.toString() || '')
+  }, [tab, monthKey, budgets])
+
   // Per-category budgets - persistido no localStorage
   const storageKey = `cat-budget-${monthKey}-${tab}`
   const [catBudgets, setCatBudgets] = useState<CategoryBudget>(() => {
@@ -100,11 +107,11 @@ export default function Planning() {
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => { setTab('personal'); setExpectedIncome(currentBudget?.expectedIncome?.toString() || ''); setExpectedExpenses(currentBudget?.expectedExpenses?.toString() || '') }}
+        <button onClick={() => setTab('personal')}
           className={`rounded-xl px-4 py-2 text-sm font-medium ${tab === 'personal' ? 'bg-emerald-500 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}`}>
           <User size={16} className="inline mr-1" />Pessoal
         </button>
-        <button onClick={() => { setTab('business'); setExpectedIncome(currentBudget?.expectedIncome?.toString() || ''); setExpectedExpenses(currentBudget?.expectedExpenses?.toString() || '') }}
+        <button onClick={() => setTab('business')}
           className={`rounded-xl px-4 py-2 text-sm font-medium ${tab === 'business' ? 'bg-emerald-500 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}`}>
           <Briefcase size={16} className="inline mr-1" />Negócio (PJ)
         </button>

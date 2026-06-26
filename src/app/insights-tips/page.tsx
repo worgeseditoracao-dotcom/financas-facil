@@ -1,40 +1,47 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, AlertTriangle, Lightbulb, Target, DollarSign, PiggyBank, Zap } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
+import { useStore } from '@/lib/store'
 
-const iconMap: Record<string, any> = { TrendingUp, AlertTriangle, Lightbulb, Target, DollarSign, PiggyBank, Zap }
 const colorMap: Record<string, string> = {
   success: 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20',
   warning: 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20',
   danger: 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20',
   info: 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20',
 }
-const iconColorMap: Record<string, string> = {
-  success: 'text-emerald-600', warning: 'text-amber-600', danger: 'text-red-600', info: 'text-blue-600',
-}
 
 export default function InsightsPage() {
+  const { state } = useStore()
   const [insights, setInsights] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   const load = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/insights')
+      const res = await fetch('/api/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transactions: state.transactions,
+          bills: state.bills,
+          receivables: state.receivables,
+          purchases: [], // preencher quando tiver dados
+        }),
+      })
       const data = await res.json()
       setInsights(data.insights || [])
     } catch {}
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [state.transactions, state.bills, state.receivables])
 
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Insights & Dicas</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Análises personalizadas baseadas nos seus dados</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Análises baseadas nos seus dados reais</p>
       </div>
 
       {loading ? (
@@ -43,15 +50,15 @@ export default function InsightsPage() {
         <div className="text-center py-16 text-zinc-400">
           <Lightbulb size={40} className="mx-auto mb-3 opacity-30" />
           <p className="font-medium">Nenhum insight ainda</p>
-          <p className="text-xs mt-1">Cadastre produtos e registre vendas para receber análises inteligentes.</p>
+          <p className="text-xs mt-1">Cadastre receitas e despesas para receber análises inteligentes.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {insights.map((insight: any) => (
             <div key={insight.id} className={`rounded-2xl border p-5 ${colorMap[insight.type] || ''}`}>
               <div className="flex items-start gap-3">
-                <div className={`shrink-0 mt-0.5 ${iconColorMap[insight.type] || ''}`}>
-                  <Lightbulb size={20} />
+                <div className="text-lg shrink-0 mt-0.5">
+                  {insight.type === 'success' ? '✅' : insight.type === 'danger' ? '🔴' : insight.type === 'warning' ? '⚠️' : '💡'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{insight.title}</h3>
