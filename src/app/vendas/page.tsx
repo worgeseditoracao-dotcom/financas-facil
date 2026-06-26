@@ -159,11 +159,12 @@ export default function VendasPage() {
           <div className="absolute top-40 -left-20 w-72 h-72 rounded-full opacity-10 blur-[80px]" style={{background:CYAN}} />
         </div>
         <div className="relative mx-auto max-w-4xl text-center">
-          <div className="afade"><Badge clr={COLOR}><Zap size={12} /> Acesso Vitalício</Badge><span className="mx-2" /><Badge><Shield size={12} /> 7 Dias de Garantia</Badge></div>
+          <div className="afade"><Badge clr={COLOR}><Zap size={12} /> Acesso Vitalício</Badge><span className="mx-2" /><Badge><Shield size={12} /> 7 Dias de Garantia</Badge><span className="mx-2" /><Badge clr="#A78BFA"><Smartphone size={12} /> Celular e Computador</Badge></div>
           <h1 className="mt-6 text-[2rem] md:text-5xl lg:text-[3.5rem] font-black leading-[1.1] afade">
             Um sistema completo para{' '}<span className="gradtxt">organizar sua vida financeira pessoal e seu negócio</span> em um único lugar
           </h1>
           <p className="mt-4 md:mt-6 text-sm md:text-lg text-zinc-400 max-w-xl mx-auto afade">Chega de planilhas, apps separados e confusão. Controle receitas, cartões, metas, investimentos e fluxo de caixa da sua empresa com um sistema profissional.</p>
+          <p className="mt-3 text-xs text-cyan-400/70 afade">☁️ Sincronização em nuvem — comece no celular, continue no computador. Seus dados sempre atualizados.</p>
           <div className="mt-8 afade"><Btn big>QUERO MINHA LICENÇA AGORA <ArrowRight size={20} /></Btn>
             <p className="mt-3 text-xs md:text-sm text-zinc-500">De <span className="line-through text-zinc-600">R$ {PRICE_NORMAL}</span> por <span className="text-white font-bold">R$ {PRICE_PROMO}</span> · Acesso vitalício</p>
           </div>
@@ -417,7 +418,7 @@ export default function VendasPage() {
           <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 mb-4"><Zap size={12} /> Oferta Especial</div>
           <h2 className="text-xl md:text-3xl font-black text-white">Tudo que você precisa para dominar suas finanças</h2>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-            {['Sistema de finanças pessoais','Sistema de finanças empresariais','Controle de receitas e despesas','Controle de cartões','Metas financeiras','Planejamento orçamentário','Simulador de investimentos','Fluxo de caixa empresarial','DRE simplificado','Contas a pagar','Relatórios exportáveis','Dashboard inteligente','Licença vitalícia','Acesso imediato','Garantia de 7 dias'].map((t,i)=><div key={i} className="flex items-center gap-2 text-sm"><Check size={14} className="text-emerald-400 shrink-0" /><span className="text-zinc-300">{t}</span></div>)}
+            {['Sistema de finanças pessoais','Sistema de finanças empresariais','Controle de receitas e despesas','Controle de cartões','Metas financeiras','Planejamento orçamentário','Simulador de investimentos','Fluxo de caixa empresarial','DRE simplificado','Contas a pagar','Relatórios exportáveis','Dashboard inteligente','Funciona no celular e computador','Sincronização em nuvem','Licença vitalícia','Acesso imediato','Garantia de 7 dias'].map((t,i)=><div key={i} className="flex items-center gap-2 text-sm"><Check size={14} className="text-emerald-400 shrink-0" /><span className="text-zinc-300">{t}</span></div>)}
           </div>
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-xs text-zinc-500">Valor individual dos módulos: <span className="line-through text-red-400">R$ {TOTAL_MODULOS.toFixed(2).replace('.',',')}</span></p>
@@ -430,7 +431,8 @@ export default function VendasPage() {
           <div className="flex items-center justify-center gap-3 mt-4 text-[10px] md:text-xs text-zinc-500 flex-wrap">
             <span className="flex items-center gap-1"><Shield size={12} className="text-emerald-400" />Garantia 7 dias</span>
             <span className="flex items-center gap-1"><Clock size={12} className="text-cyan-400" />Vitalício</span>
-            <span className="flex items-center gap-1"><Smartphone size={12} />Multi-dispositivo</span>
+            <span className="flex items-center gap-1"><Smartphone size={12} />Celular e PC</span>
+            <span className="flex items-center gap-1">☁️ Nuvem</span>
           </div>
         </div></Reveal>
         <div id="stats" className="grid grid-cols-2 gap-4 mt-8">
