@@ -1,34 +1,30 @@
 import { NextResponse } from 'next/server'
-import { Pool } from 'pg'
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
-  try {
-    const pool = new Pool({
-      host: 'aws-1-us-west-2.pooler.supabase.com',
-      port: 5432,
-      user: `postgres.pkampjlywarrfmodmvaj`,
-      password: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-      database: 'postgres',
-      ssl: { rejectUnauthorized: false },
-      connectionTimeoutMillis: 10000,
-    })
+  const results: string[] = []
 
-    const sql = `
-CREATE TABLE IF NOT EXISTS companies (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, type TEXT DEFAULT 'business', monthly_revenue_target NUMERIC(12,2) DEFAULT 0, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());
-CREATE INDEX IF NOT EXISTS idx_companies_user ON companies(user_id);
-CREATE TABLE IF NOT EXISTS business_products (id TEXT PRIMARY KEY, company_id TEXT NOT NULL, user_id TEXT NOT NULL, name TEXT NOT NULL, sale_price NUMERIC(12,2) DEFAULT 0, cost_price NUMERIC(12,2) DEFAULT 0, category TEXT DEFAULT 'product', active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW());
-CREATE INDEX IF NOT EXISTS idx_products_company ON business_products(company_id);
-CREATE TABLE IF NOT EXISTS product_sales (id TEXT PRIMARY KEY, company_id TEXT NOT NULL, product_id TEXT NOT NULL, user_id TEXT NOT NULL, quantity INTEGER DEFAULT 1, sale_price NUMERIC(12,2) NOT NULL, cost_price NUMERIC(12,2) NOT NULL, sale_date TEXT NOT NULL, client_name TEXT DEFAULT '', created_at TIMESTAMPTZ DEFAULT NOW());
-CREATE INDEX IF NOT EXISTS idx_sales_company ON product_sales(company_id);
-    `
-
-    const client = await pool.connect()
-    await client.query(sql)
-    client.release()
-    await pool.end()
-
-    return NextResponse.json({ ok: true, message: 'Tabelas criadas com sucesso!' })
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err.message })
+  // Verifica tabelas existentes
+  for (const table of ['users', 'purchases', 'webhook_logs', 'companies', 'business_products', 'product_sales', 'user_data']) {
+    const { error } = await supabase.from(table).select('id').limit(1)
+    results.push(error ? `❌ ${table}` : `✅ ${table}`)
   }
+
+  // Tenta criar user_data via inserção + tratamento de erro
+  const { error } = await supabase.from('user_data').upsert({
+    user_id: 'migrate_test',
+    key: 'test',
+    data: '{}',
+    updated_at: new Date().toISOString(),
+  }).select()
+
+  if (error && error.message.includes('not find')) {
+    results.push('\n📋 Execute o SQL no Supabase: supabase/migrations/00004_sync.sql')
+  } else if (!error) {
+    // Limpa o registro de teste
+    await supabase.from('user_data').delete().eq('user_id', 'migrate_test')
+    results.push('✅ user_data pronto para uso')
+  }
+
+  return NextResponse.json({ ok: true, results })
 }
