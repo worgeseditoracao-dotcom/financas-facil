@@ -300,6 +300,24 @@ export default function VendasPage() {
 
       <CTABlock txt="Quero Ver Como Funciona Para Mim" />
 
+      {/* VÍDEO DEMONSTRATIVO */}
+      <section className="px-4 py-16 border-t border-white/5">
+        <SectionHead sub="Veja o ECONOMIZZEI em ação">Demonstração do App</SectionHead>
+        <div className="mx-auto max-w-3xl">
+          <div className="glass rounded-3xl overflow-hidden shadow-2xl">
+            <div className="aspect-video bg-[#0A0614]">
+              <iframe
+                src="https://player.vimeo.com/video/1205620629?h=9b7a3c2d1e&autoplay=0&title=0&byline=0&portrait=0"
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="Demonstração ECONOMIZZEI"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 4. GALERIA */}
       <section className="px-4 py-16 border-t border-white/5">
         <SectionHead sub="6 telas. Infinitas possibilidades de controle financeiro">Conheça o sistema por dentro</SectionHead>
