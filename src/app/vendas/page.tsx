@@ -97,12 +97,12 @@ export default function VendasPage() {
   }, [])
 
   const slides = [
-    { t:'Dashboard', d:'Visão completa em tempo real', b:'Tome decisões baseadas em dados' },
-    { t:'Cartões', d:'Limite, faturas e compras parceladas', b:'Nunca mais perca o controle' },
-    { t:'Metas', d:'Defina objetivos com progresso', b:'Realize seus sonhos mais rápido' },
-    { t:'Investimentos', d:'Simule rendimentos', b:'Faça seu dinheiro trabalhar' },
-    { t:'Empresarial', d:'Fluxo de caixa, DRE e lucro', b:'Saiba exatamente quanto você lucra' },
-    { t:'Contas', d:'Nunca esqueça um vencimento', b:'Zero juros por atraso' },
+    { t:'Dashboard', d:'Visão completa em tempo real', b:'Tome decisões baseadas em dados', img:'/prints/dashboard.png' },
+    { t:'Contas', d:'Contas a pagar e receber', b:'Nunca mais esqueça um vencimento', img:'/prints/contas.png' },
+    { t:'Empresa', d:'Fluxo de caixa, DRE e lucro', b:'Saiba exatamente quanto você lucra', img:'/prints/empresa.png' },
+    { t:'Insights', d:'Análises inteligentes', b:'Receba dicas personalizadas', img:'/prints/insights.png' },
+    { t:'Relatórios', d:'Gráficos e exportações', b:'Visualize seus dados com clareza', img:'/prints/relatorios.png' },
+    { t:'Financeiro Pessoal', d:'Receitas e despesas', b:'Controle total do seu dinheiro', img:'/prints/pessoal.png' },
   ]
 
   const depoimentos = [
@@ -306,11 +306,11 @@ export default function VendasPage() {
           <div className="flex flex-col lg:flex-row items-center gap-6">
             <div className="flex lg:hidden items-center gap-2 w-full justify-center">
               <button onClick={()=>setCarIdx(Math.max(0,carIdx-1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={18} className="rotate-90" /></button>
-              <div className="flex-1 max-w-[200px]"><div className="glass rounded-3xl overflow-hidden"><div className="aspect-[9/16] bg-[#0A0614] flex items-center justify-center"><Wallet size={40} className="opacity-20" style={{color:COLOR}} /></div></div></div>
+              <div className="flex-1 max-w-[200px]"><div className="glass rounded-3xl overflow-hidden"><div className="aspect-[16/10] bg-[#0A0614] flex items-center justify-center"><img src={slides[carIdx].img} alt={slides[carIdx].t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><Wallet size={40} className="absolute opacity-20" style={{color:COLOR}} /></div></div></div>
               <button onClick={()=>setCarIdx(Math.min(slides.length-1,carIdx+1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={18} className="-rotate-90" /></button>
             </div>
             <div className="hidden lg:grid grid-cols-3 gap-3 w-full">
-              {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[16/10] bg-[#0A0614] flex items-center justify-center relative"><Wallet size={32} className="opacity-20" style={{color:COLOR}} /><p className="absolute bottom-2 text-[9px] text-zinc-500">{s.t}</p></div></div></Reveal>)}
+              {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[16/10] bg-[#0A0614] relative"><img src={s.img} alt={s.t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><p className="absolute bottom-2 left-0 right-0 text-center text-[9px] text-zinc-500 bg-black/50 py-1">{s.t}</p></div></div></Reveal>)}
             </div>
             <div className="flex lg:hidden justify-center gap-1.5">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-1.5 rounded-full transition-all ${i===carIdx?'w-6':'w-1.5 bg-white/20'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
           </div>
