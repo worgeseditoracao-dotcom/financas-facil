@@ -5,7 +5,50 @@ import { AuthProvider, useAuth, PUBLIC_ROUTES } from './AuthContext'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import FloatingButton from '@/components/layout/FloatingButton'
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
+
+function CloudSync() {
+  const { user } = useAuth()
+  const lastSync = useRef('')
+  const loaded = useRef(false)
+
+  useEffect(() => {
+    if (!user?.id || loaded.current) return
+    loaded.current = true
+    fetch('/api/sync-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'load', userId: user.id }),
+    }).then(r => r.json()).then(data => {
+      if (data?.store) {
+        const local = localStorage.getItem('financas-facil-data')
+        const localData = local ? JSON.parse(local) : null
+        if (!localData?.transactions?.length) {
+          localStorage.setItem('financas-facil-data', JSON.stringify(data.store))
+          window.location.reload()
+        }
+      }
+    })
+  }, [user?.id])
+
+  useEffect(() => {
+    if (!user?.id) return
+    const interval = setInterval(() => {
+      const current = localStorage.getItem('financas-facil-data')
+      if (current && current !== lastSync.current) {
+        lastSync.current = current
+        fetch('/api/sync-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save', userId: user.id, store: JSON.parse(current) }),
+        })
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [user?.id])
+
+  return null
+}
 
 function Shell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
@@ -26,7 +69,6 @@ function Shell({ children }: { children: ReactNode }) {
     return <>{children}</>
   }
 
-  // Admin routes: não renderiza sidebar/header normais (admin layout cuida disso)
   if (isAdmin) {
     if (!user || user.role !== 'admin') {
       return (
@@ -40,12 +82,11 @@ function Shell({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <CloudSync />
       <Sidebar />
       <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden">
         <Header />
-        <main className="flex-1 overflow-auto p-4 md:p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
       <FloatingButton />
     </>
