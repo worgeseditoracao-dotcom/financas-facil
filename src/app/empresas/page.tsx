@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Building2, Trash2, TrendingUp, Package, ShoppingCart, DollarSign, ArrowDown, Wallet } from 'lucide-react'
+import { Plus, Building2, Trash2, TrendingUp, Package, ShoppingCart, DollarSign, ArrowDown, Wallet, FileText, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
 
 export default function EmpresasPage() {
@@ -208,6 +208,73 @@ export default function EmpresasPage() {
           </div>
 
           {/* Lucro por produto */}
+          {/* RELATÓRIO DA EMPRESA */}
+          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText size={18} className="text-purple-500" />
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Relatório — {companies.find(c => c.id === selected)?.name || 'Empresa'}</h3>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <ReportItem label="Faturamento Bruto" value={fmt(analytics?.totalRevenue || 0)} color="text-blue-600" />
+              <ReportItem label="Custos dos Produtos" value={fmt(analytics?.totalCost || 0)} color="text-red-600" />
+              <ReportItem label="Despesas Operacionais" value={fmt(totalExpenses)} color="text-orange-600" />
+              <ReportItem label="Lucro Líquido" value={fmt(profit)} color={profit >= 0 ? 'text-emerald-600' : 'text-red-600'} big />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <ReportItem label="Margem Bruta" value={`${(analytics?.totalMargin || 0).toFixed(1)}%`} color="text-purple-600" />
+              <ReportItem label="Margem Líquida" value={`${(analytics?.totalRevenue || 0) > 0 ? ((profit / (analytics?.totalRevenue || 1)) * 100).toFixed(1) : '0.0'}%`} color={profit >= 0 ? 'text-emerald-600' : 'text-red-600'} />
+              <ReportItem label="Total de Vendas" value={String(analytics?.saleCount || 0)} color="text-blue-600" />
+              <ReportItem label="Produtos Ativos" value={String(analytics?.productCount || products.length)} color="text-purple-600" />
+            </div>
+
+            {/* Despesas por categoria */}
+            {expenses.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700">
+                <p className="text-xs font-medium text-zinc-500 mb-2">Despesas por Categoria</p>
+                <div className="space-y-1.5">
+                  {Object.entries(
+                    expenses.reduce((acc: Record<string, number>, e) => {
+                      const cat = e.category || 'Outros'
+                      acc[cat] = (acc[cat] || 0) + Number(e.value)
+                      return acc
+                    }, {})
+                  ).sort((a, b) => b[1] - a[1]).map(([cat, val]) => (
+                    <div key={cat} className="flex items-center justify-between text-sm">
+                      <span className="text-zinc-600 dark:text-zinc-400">{cat}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-24 h-1.5 bg-zinc-100 dark:bg-zinc-700 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-red-400" style={{ width: `${Math.min(100, (val / Math.max(1, totalExpenses)) * 100)}%` }} />
+                        </div>
+                        <span className="text-red-500 font-medium text-xs w-20 text-right">{fmt(val)} ({totalExpenses > 0 ? ((val / totalExpenses) * 100).toFixed(0) : 0}%)</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Vendas recentes */}
+            {analytics?.byProduct?.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700">
+                <p className="text-xs font-medium text-zinc-500 mb-2">Top Produtos por Lucro</p>
+                <div className="space-y-1">
+                  {analytics.byProduct.slice(0, 5).map((p: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-zinc-50 dark:border-zinc-700 last:border-0">
+                      <span className="text-zinc-700 dark:text-zinc-300 truncate flex-1">{p.product}</span>
+                      <div className="flex gap-3 text-right shrink-0">
+                        <span className="text-zinc-400 text-xs">{p.quantity}x</span>
+                        <span className={p.profit >= 0 ? 'text-emerald-600' : 'text-red-600'}>{fmt(p.profit)}</span>
+                        <span className="text-zinc-400 text-xs w-10 text-right">{p.margin.toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {analytics?.byProduct?.length > 0 && (
             <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
               <h3 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-zinc-50">Lucro por Produto</h3>
@@ -248,6 +315,15 @@ function Stat({ title, value, color }: { title: string; value: string; color: st
     <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4">
       <p className="text-xs text-zinc-500">{title}</p>
       <p className={`text-lg font-bold ${color}`}>{value}</p>
+    </div>
+  )
+}
+
+function ReportItem({ label, value, color, big }: { label: string; value: string; color: string; big?: boolean }) {
+  return (
+    <div className="rounded-xl bg-zinc-50 dark:bg-zinc-700/50 p-3">
+      <p className="text-[10px] text-zinc-500">{label}</p>
+      <p className={`${big ? 'text-base' : 'text-sm'} font-bold ${color}`}>{value}</p>
     </div>
   )
 }
