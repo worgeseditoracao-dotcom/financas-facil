@@ -1,31 +1,14 @@
 import { NextResponse } from 'next/server'
-import { Pool } from 'pg'
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
-  try {
-    const poolerUrl = 'postgresql://postgres.pkampjlywarrfmodmvaj@aws-1-us-west-2.pooler.supabase.com:5432/postgres'
-    const pool = new Pool({
-      connectionString: poolerUrl,
-      password: process.env.SUPABASE_SERVICE_ROLE_KEY,
-      ssl: { rejectUnauthorized: false },
-      connectionTimeoutMillis: 15000,
-    })
+  const results: string[] = []
+  const tables = ['users', 'purchases', 'webhook_logs', 'companies', 'business_products', 'product_sales', 'user_data', 'messages']
 
-    const client = await pool.connect()
-    const result = await client.query(`
-      CREATE TABLE IF NOT EXISTS user_data (
-        user_id TEXT NOT NULL,
-        key TEXT NOT NULL,
-        data TEXT DEFAULT '',
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        PRIMARY KEY (user_id, key)
-      );
-    `)
-    client.release()
-    await pool.end()
-
-    return NextResponse.json({ ok: true, message: 'Tabela user_data criada!' })
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err.message })
+  for (const t of tables) {
+    const { error } = await supabase.from(t).select('id').limit(1)
+    results.push(error ? `❌ ${t}` : `✅ ${t}`)
   }
+
+  return NextResponse.json({ ok: true, results })
 }
