@@ -203,6 +203,23 @@ export default function VendasPage() {
         </div>
       </section>
 
+      {/* VÍDEO */}
+      <section className="px-0 md:px-4 py-8 md:py-12">
+        <div className="mx-auto max-w-4xl">
+          <div className="md:glass md:rounded-3xl overflow-hidden">
+            <div className="aspect-video bg-black">
+              <iframe
+                src="https://player.vimeo.com/video/1205620629?h=9b7a3c2d1e&autoplay=0&title=0&byline=0&portrait=0"
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="ECONOMIZZEI"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 1. IDENTIFICAÇÃO IMEDIATA */}
       <section className="px-4 py-16 border-t border-white/5">
         <SectionHead sub="Independente do seu perfil, ele foi feito sob medida para você">Este aplicativo foi criado para você que...</SectionHead>
@@ -236,26 +253,6 @@ export default function VendasPage() {
       </section>
 
       <CTABlock txt="Quero Resolver Esses Problemas Agora" />
-
-      {/* VÍDEO */}
-      <section className="px-0 md:px-4 py-8 md:py-12 border-t border-white/5">
-        <div className="mx-auto max-w-4xl text-center md:px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 px-4">Veja como é simples</h2>
-        </div>
-        <div className="mx-auto max-w-4xl">
-          <div className="md:glass md:rounded-3xl overflow-hidden">
-            <div className="aspect-video bg-black">
-              <iframe
-                src="https://player.vimeo.com/video/1205620629?h=9b7a3c2d1e&autoplay=0&title=0&byline=0&portrait=0"
-                className="w-full h-full"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                title="ECONOMIZZEI"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 2. DOIS SISTEMAS EM UM */}
       <section className="px-4 py-16 border-t border-white/5">
