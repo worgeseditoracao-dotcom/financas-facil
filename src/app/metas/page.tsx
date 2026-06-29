@@ -265,7 +265,7 @@ function GoalForm({ goal, onSave, onClose }: {
     onSave({
       name: name.trim(), description: description.trim() || undefined,
       targetValue: Math.abs(parseFloat(targetValue)), currentValue: Math.abs(parseFloat(currentValue) || 0),
-      deadline: deadline || undefined, category: type, goalType: type as Goal['goalType'], type: type as Goal['type'],
+      deadline: deadline || undefined, category: type, goalType: (type || 'generic') as Goal['goalType'],
       monthlySaving: parseFloat(monthlySaving) || undefined,
       monthlySavingSuggest: savingSuggest || undefined,
       module,

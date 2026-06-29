@@ -310,7 +310,7 @@ export default function VendasPage() {
               <button onClick={()=>setCarIdx(Math.min(slides.length-1,carIdx+1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={18} className="-rotate-90" /></button>
             </div>
             <div className="hidden lg:grid grid-cols-3 gap-3 w-full">
-              {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[9/16] bg-[#0A0614] flex items-center justify-center relative"><Wallet size={32} className="opacity-20" style={{color:COLOR}} /><p className="absolute bottom-2 text-[9px] text-zinc-500">{s.t}</p></div></div></Reveal>)}
+              {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[16/10] bg-[#0A0614] flex items-center justify-center relative"><Wallet size={32} className="opacity-20" style={{color:COLOR}} /><p className="absolute bottom-2 text-[9px] text-zinc-500">{s.t}</p></div></div></Reveal>)}
             </div>
             <div className="flex lg:hidden justify-center gap-1.5">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-1.5 rounded-full transition-all ${i===carIdx?'w-6':'w-1.5 bg-white/20'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
           </div>
