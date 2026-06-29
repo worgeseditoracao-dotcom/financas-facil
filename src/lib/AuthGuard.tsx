@@ -10,23 +10,34 @@ import { type ReactNode, useEffect, useRef } from 'react'
 function CloudSync() {
   const { user } = useAuth()
   const lastSync = useRef('')
-  const loaded = useRef(false)
+  const syncedOnce = useRef(false)
 
   useEffect(() => {
-    if (!user?.id || loaded.current) return
-    loaded.current = true
+    if (!user?.id) return
     fetch('/api/sync-data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'load', userId: user.id }),
-    }).then(r => r.json()).then(data => {
-      if (data?.store) {
-        const local = localStorage.getItem('financas-facil-data')
-        const localData = local ? JSON.parse(local) : null
-        if (!localData?.transactions?.length) {
-          localStorage.setItem('financas-facil-data', JSON.stringify(data.store))
-          window.location.reload()
-        }
+    }).then(r => r.json()).then(cloud => {
+      if (!cloud?.store) return
+      const local = localStorage.getItem('financas-facil-data')
+      const localData = local ? JSON.parse(local) : {}
+
+      const cloudCount = countItems(cloud.store)
+      const localCount = countItems(localData)
+
+      // Cloud tem mais dados = carrega da nuvem
+      if (cloudCount > localCount) {
+        localStorage.setItem('financas-facil-data', JSON.stringify(cloud.store))
+        window.location.reload()
+      }
+      // Local tem mais = sobe pra nuvem
+      if (localCount > cloudCount) {
+        fetch('/api/sync-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save', userId: user.id, store: localData }),
+        })
       }
     })
   }, [user?.id])
@@ -41,13 +52,23 @@ function CloudSync() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'save', userId: user.id, store: JSON.parse(current) }),
-        })
+        }).then(() => { syncedOnce.current = true })
       }
-    }, 5000)
+    }, 3000)
     return () => clearInterval(interval)
   }, [user?.id])
 
   return null
+}
+
+function countItems(store: any): number {
+  if (!store) return 0
+  let count = 0
+  const keys = ['transactions', 'goals', 'bills', 'receivables', 'bankAccounts', 'creditCards', 'budgets', 'investments', 'clients', 'suppliers', 'subscriptions', 'businessProducts', 'statementEntries']
+  for (const k of keys) {
+    if (Array.isArray(store[k])) count += store[k].length
+  }
+  return count
 }
 
 function Shell({ children }: { children: ReactNode }) {
