@@ -1,30 +1,31 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { Pool } from 'pg'
 
 export async function GET() {
-  const results: string[] = []
+  try {
+    const poolerUrl = 'postgresql://postgres.pkampjlywarrfmodmvaj@aws-1-us-west-2.pooler.supabase.com:5432/postgres'
+    const pool = new Pool({
+      connectionString: poolerUrl,
+      password: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 15000,
+    })
 
-  // Verifica tabelas existentes
-  for (const table of ['users', 'purchases', 'webhook_logs', 'companies', 'business_products', 'product_sales', 'user_data']) {
-    const { error } = await supabase.from(table).select('id').limit(1)
-    results.push(error ? `❌ ${table}` : `✅ ${table}`)
+    const client = await pool.connect()
+    const result = await client.query(`
+      CREATE TABLE IF NOT EXISTS user_data (
+        user_id TEXT NOT NULL,
+        key TEXT NOT NULL,
+        data TEXT DEFAULT '',
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (user_id, key)
+      );
+    `)
+    client.release()
+    await pool.end()
+
+    return NextResponse.json({ ok: true, message: 'Tabela user_data criada!' })
+  } catch (err: any) {
+    return NextResponse.json({ ok: false, error: err.message })
   }
-
-  // Tenta criar user_data via inserção + tratamento de erro
-  const { error } = await supabase.from('user_data').upsert({
-    user_id: 'migrate_test',
-    key: 'test',
-    data: '{}',
-    updated_at: new Date().toISOString(),
-  }).select()
-
-  if (error && error.message.includes('not find')) {
-    results.push('\n📋 Execute o SQL no Supabase: supabase/migrations/00004_sync.sql')
-  } else if (!error) {
-    // Limpa o registro de teste
-    await supabase.from('user_data').delete().eq('user_id', 'migrate_test')
-    results.push('✅ user_data pronto para uso')
-  }
-
-  return NextResponse.json({ ok: true, results })
 }
