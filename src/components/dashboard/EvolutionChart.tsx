@@ -1,6 +1,6 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart, ReferenceLine } from 'recharts'
 import type { Transaction } from '@/lib/types'
 import { groupByMonth } from '@/lib/utils'
 import { useMemo } from 'react'
@@ -11,10 +11,15 @@ export default function EvolutionChart({ transactions }: Props) {
   const data = useMemo(() => {
     const monthly = groupByMonth(transactions)
     let acc = 0
-    return monthly.map(m => {
+    const result = monthly.map((m, i) => {
       acc += m.income - m.expense
-      return { ...m, balance: acc }
+      const prev = i > 0 ? monthly[i - 1] : null
+      const growth = prev && prev.income > 0
+        ? (((m.income - prev.income) / prev.income) * 100).toFixed(1)
+        : null
+      return { ...m, balance: acc, growth: growth ? parseFloat(growth) : 0 }
     })
+    return result
   }, [transactions])
 
   if (data.length === 0) {
@@ -22,7 +27,7 @@ export default function EvolutionChart({ transactions }: Props) {
   }
 
   return (
-    <div className="h-72">
+    <div className="h-80">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
           <defs>
@@ -39,14 +44,19 @@ export default function EvolutionChart({ transactions }: Props) {
           }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickFormatter={(v) => `R$${Number(v)}`} axisLine={false} tickLine={false} />
           <Tooltip
-            formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, 'Saldo']}
+            formatter={(value: any, name: string) => {
+              if (name === 'balance') return [`R$ ${Number(value).toFixed(2)}`, 'Saldo']
+              return [`${Number(value).toFixed(1)}%`, 'Crescimento']
+            }}
             contentStyle={{
               borderRadius: '16px', border: 'none', background: '#FFFFFF',
               boxShadow: '0 8px 32px rgba(0,0,0,0.08)', padding: '12px 16px',
               fontSize: '13px', color: '#1F2937',
             }}
           />
-          <Area type="monotone" dataKey="balance" stroke="#8B5CF6" strokeWidth={2.5} fill="url(#evolutionGrad)" dot={{ r: 4, fill: '#8B5CF6', strokeWidth: 2, stroke: '#FFFFFF' }} activeDot={{ r: 6, fill: '#8B5CF6', strokeWidth: 3, stroke: '#FFFFFF' }} />
+          <ReferenceLine y={0} stroke="#E5E7EB" strokeWidth={1} />
+          <Area type="monotone" dataKey="balance" name="Saldo" stroke="#8B5CF6" strokeWidth={2.5} fill="url(#evolutionGrad)" dot={{ r: 4, fill: '#8B5CF6', strokeWidth: 2, stroke: '#FFFFFF' }} activeDot={{ r: 6, fill: '#8B5CF6', strokeWidth: 3, stroke: '#FFFFFF' }} />
+          <Line type="monotone" dataKey="growth" name="Crescimento %" stroke="#06B6D4" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 2, fill: '#06B6D4' }} yAxisId={0} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
