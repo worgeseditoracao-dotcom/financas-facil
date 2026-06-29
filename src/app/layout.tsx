@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { StoreProvider } from "@/lib/store"
 import AuthGuard from "@/lib/AuthGuard"
-import CloudSyncProvider from "@/lib/CloudSyncProvider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,9 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex bg-white overflow-x-hidden">
         <StoreProvider>
-          <CloudSyncProvider>
-            <AuthGuard>{children}</AuthGuard>
-          </CloudSyncProvider>
+          <AuthGuard>{children}</AuthGuard>
         </StoreProvider>
       </body>
     </html>
