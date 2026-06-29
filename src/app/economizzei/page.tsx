@@ -73,6 +73,7 @@ function CTABlock({ txt }: { txt: string }) {
 export default function VendasPage() {
   const [faq, setFaq] = useState<number | null>(null)
   const [carIdx, setCarIdx] = useState(0)
+  const [lightbox, setLightbox] = useState(false)
   const [pStep, setPStep] = useState(0)
   const [nums, setNums] = useState({ u: 0, s: 0 })
   const pr = useRef<HTMLDivElement>(null)
@@ -304,28 +305,47 @@ export default function VendasPage() {
         <SectionHead sub="6 telas. Infinitas possibilidades de controle financeiro">Conheça o sistema por dentro</SectionHead>
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col lg:flex-row items-center gap-6">
-          <div className="flex lg:hidden flex-col items-center gap-3 w-full">
-            <div className="w-full max-w-md">
+          {/* GALERIA MOBILE */}
+          <div className="flex lg:hidden flex-col items-center gap-4 w-full">
+            <div className="w-[95%] cursor-pointer" onClick={() => setLightbox(true)}>
               <div className="glass rounded-3xl overflow-hidden shadow-2xl">
                 <div className="aspect-[16/10] bg-[#0A0614] relative">
                   <img src={slides[carIdx].img} alt={slides[carIdx].t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  <div className="absolute inset-0 bg-black/10 pointer-events-none" />
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button onClick={()=>setCarIdx(Math.max(0,carIdx-1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={20} className="rotate-90" /></button>
-              <div className="flex gap-2">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-2.5 rounded-full transition-all ${i===carIdx?'w-8':'w-2.5 bg-white/30'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
-              <button onClick={()=>setCarIdx(Math.min(slides.length-1,carIdx+1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={20} className="-rotate-90" /></button>
+            <div className="flex items-center gap-4">
+              <button onClick={()=>setCarIdx(Math.max(0,carIdx-1))} className="p-4 rounded-xl glass text-white active:scale-95"><ChevronDown size={22} className="rotate-90" /></button>
+              <div className="flex gap-2">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-3 rounded-full transition-all ${i===carIdx?'w-10':'w-3 bg-white/30'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
+              <button onClick={()=>setCarIdx(Math.min(slides.length-1,carIdx+1))} className="p-4 rounded-xl glass text-white active:scale-95"><ChevronDown size={22} className="-rotate-90" /></button>
             </div>
+            <p className="text-xs text-zinc-500">Toque na imagem para ampliar</p>
           </div>
 
-          <div className="hidden lg:grid grid-cols-3 gap-4 w-full">
-            {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] shadow-xl ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[16/10] bg-[#0A0614] relative"><img src={s.img} alt={s.t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white bg-black/60 py-1.5 mx-3 rounded-lg">{s.t}</p></div></div></Reveal>)}
+          {/* GALERIA DESKTOP */}
+          <div className="hidden lg:grid grid-cols-3 gap-5 w-full">
+            {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-[1.03] shadow-2xl ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>{setCarIdx(i);setLightbox(true)}}><div className="aspect-[16/10] bg-[#0A0614] relative"><img src={s.img} alt={s.t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><p className="absolute bottom-3 left-3 right-3 text-center text-xs text-white bg-black/70 py-2 rounded-xl">{s.t}</p></div></div></Reveal>)}
             </div>
             <div className="flex lg:hidden justify-center gap-1.5">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-1.5 rounded-full transition-all ${i===carIdx?'w-6':'w-1.5 bg-white/20'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
           </div>
-          <div className="mt-6 text-center"><p className="text-sm md:text-base font-bold text-white">{slides[carIdx].t}</p><p className="text-xs md:text-sm text-zinc-400 mt-1">{slides[carIdx].d}</p><p className="text-xs mt-1.5" style={{color:CYAN}}>✨ {slides[carIdx].b}</p></div>
+          {/* LIGHTBOX */}
+        {lightbox && (
+          <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4" onClick={() => setLightbox(false)}>
+            <button onClick={() => setLightbox(false)} className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl z-10">&times;</button>
+            <button onClick={(e) => { e.stopPropagation(); setCarIdx(Math.max(0, carIdx - 1)) }} className="absolute left-2 md:left-8 text-white/80 hover:text-white p-3 z-10">
+              <ChevronDown size={32} className="rotate-90" />
+            </button>
+            <img src={slides[carIdx].img} alt={slides[carIdx].t} className="max-w-full max-h-[90vh] object-contain rounded-2xl" onClick={(e) => e.stopPropagation()} />
+            <button onClick={(e) => { e.stopPropagation(); setCarIdx(Math.min(slides.length - 1, carIdx + 1)) }} className="absolute right-2 md:right-8 text-white/80 hover:text-white p-3 z-10">
+              <ChevronDown size={32} className="-rotate-90" />
+            </button>
+            <div className="absolute bottom-6 flex gap-2">
+              {slides.map((_, i) => <button key={i} onClick={(e) => { e.stopPropagation(); setCarIdx(i) }} className={`h-3 rounded-full transition-all ${i === carIdx ? 'w-10' : 'w-3 bg-white/40'}`} style={{ background: i === carIdx ? COLOR : undefined }} />)}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 text-center"><p className="text-sm md:text-base font-bold text-white">{slides[carIdx].t}</p><p className="text-xs md:text-sm text-zinc-400 mt-1">{slides[carIdx].d}</p><p className="text-xs mt-1.5" style={{color:CYAN}}>✨ {slides[carIdx].b}</p></div>
         </div>
       </section>
 
