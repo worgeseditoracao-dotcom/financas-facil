@@ -304,13 +304,24 @@ export default function VendasPage() {
         <SectionHead sub="6 telas. Infinitas possibilidades de controle financeiro">Conheça o sistema por dentro</SectionHead>
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col lg:flex-row items-center gap-6">
-            <div className="flex lg:hidden items-center gap-2 w-full justify-center">
-              <button onClick={()=>setCarIdx(Math.max(0,carIdx-1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={18} className="rotate-90" /></button>
-              <div className="flex-1 max-w-[200px]"><div className="glass rounded-3xl overflow-hidden"><div className="aspect-[16/10] bg-[#0A0614] flex items-center justify-center"><img src={slides[carIdx].img} alt={slides[carIdx].t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><Wallet size={40} className="absolute opacity-20" style={{color:COLOR}} /></div></div></div>
-              <button onClick={()=>setCarIdx(Math.min(slides.length-1,carIdx+1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={18} className="-rotate-90" /></button>
+          <div className="flex lg:hidden flex-col items-center gap-3 w-full">
+            <div className="w-full max-w-md">
+              <div className="glass rounded-3xl overflow-hidden shadow-2xl">
+                <div className="aspect-[16/10] bg-[#0A0614] relative">
+                  <img src={slides[carIdx].img} alt={slides[carIdx].t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                  <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+                </div>
+              </div>
             </div>
-            <div className="hidden lg:grid grid-cols-3 gap-3 w-full">
-              {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[16/10] bg-[#0A0614] relative"><img src={s.img} alt={s.t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><p className="absolute bottom-2 left-0 right-0 text-center text-[9px] text-zinc-500 bg-black/50 py-1">{s.t}</p></div></div></Reveal>)}
+            <div className="flex items-center gap-3">
+              <button onClick={()=>setCarIdx(Math.max(0,carIdx-1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={20} className="rotate-90" /></button>
+              <div className="flex gap-2">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-2.5 rounded-full transition-all ${i===carIdx?'w-8':'w-2.5 bg-white/30'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
+              <button onClick={()=>setCarIdx(Math.min(slides.length-1,carIdx+1))} className="p-3 rounded-xl glass text-zinc-400 active:scale-95"><ChevronDown size={20} className="-rotate-90" /></button>
+            </div>
+          </div>
+
+          <div className="hidden lg:grid grid-cols-3 gap-4 w-full">
+            {slides.map((s,i)=><Reveal key={i}><div className={`glass rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] shadow-xl ${i===carIdx?'ring-2':''}`} style={i===carIdx?{ringColor:COLOR}:{}} onClick={()=>setCarIdx(i)}><div className="aspect-[16/10] bg-[#0A0614] relative"><img src={s.img} alt={s.t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /><p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white bg-black/60 py-1.5 mx-3 rounded-lg">{s.t}</p></div></div></Reveal>)}
             </div>
             <div className="flex lg:hidden justify-center gap-1.5">{slides.map((_,i)=><button key={i} onClick={()=>setCarIdx(i)} className={`h-1.5 rounded-full transition-all ${i===carIdx?'w-6':'w-1.5 bg-white/20'}`} style={{background:i===carIdx?COLOR:undefined}} />)}</div>
           </div>
