@@ -169,19 +169,6 @@ export default function VendasPage() {
           <div className="mt-8 afade"><Btn big>QUERO MINHA LICENÇA AGORA <ArrowRight size={20} /></Btn>
             <p className="mt-3 text-xs md:text-sm text-zinc-500">De <span className="line-through text-zinc-600">R$ {PRICE_NORMAL}</span> por <span className="text-white font-bold">R$ {PRICE_PROMO}</span> · Acesso vitalício</p>
           </div>
-          <div className="mt-12 mx-auto max-w-[280px] md:max-w-sm afade">
-            <div className="glow rounded-[2rem] overflow-hidden border border-white/10">
-              <div className="aspect-[9/16] bg-[#0A0614] flex flex-col items-center justify-center p-4 relative">
-                <div className="w-full space-y-2.5"><div className="h-1.5 rounded-full" style={{background:COLOR,width:'65%'}} /><div className="h-1.5 rounded-full bg-white/10 w-full" /><div className="h-1.5 rounded-full bg-white/10 w-4/5" /></div>
-                <div className="mt-4 grid grid-cols-2 gap-2 w-full">
-                  <div className="rounded-2xl p-3" style={{background:COLOR+'15'}}><div className="h-1 rounded-full bg-white/20 w-3/4 mb-2" /><span className="text-lg font-bold" style={{color:COLOR}}>+2,4k</span></div>
-                  <div className="rounded-2xl p-3" style={{background:CYAN+'15'}}><div className="h-1 rounded-full bg-white/20 w-3/4 mb-2" /><span className="text-lg font-bold" style={{color:CYAN}}>-1,1k</span></div>
-                </div>
-                <div className="mt-3 w-full h-20 rounded-2xl bg-white/5 flex items-center justify-center"><BarChart3 size={24} className="opacity-30" style={{color:COLOR}} /></div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0A0614] h-16" />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -204,8 +191,8 @@ export default function VendasPage() {
       </section>
 
       {/* VÍDEO */}
-      <section className="px-0 md:px-4 py-8 md:py-12">
-        <div className="mx-auto max-w-4xl">
+      <section className="py-8 md:py-12">
+        <div className="mx-auto md:max-w-4xl">
           <div className="md:glass md:rounded-3xl overflow-hidden">
             <div className="aspect-video">
               <iframe
