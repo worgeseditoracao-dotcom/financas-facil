@@ -207,7 +207,7 @@ export default function VendasPage() {
       <section className="px-0 md:px-4 py-8 md:py-12">
         <div className="mx-auto max-w-4xl">
           <div className="md:glass md:rounded-3xl overflow-hidden">
-            <div className="aspect-video bg-black">
+            <div className="aspect-video">
               <iframe
                 src="https://player.vimeo.com/video/1205620629?h=9b7a3c2d1e&autoplay=0&title=0&byline=0&portrait=0"
                 className="w-full h-full"
