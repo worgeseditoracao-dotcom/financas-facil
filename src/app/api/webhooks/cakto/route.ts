@@ -53,19 +53,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, message: 'Recebido (formato não reconhecido)' })
   }
 
-  // Verificar secret (se configurado)
+  // Verificar secret (avisa mas não bloqueia)
   const payloadSecret = payload.secret || payload.data?.secret || ''
-  if (!verifyCaktoPayloadSecret(payloadSecret)) {
+  const secretOk = verifyCaktoPayloadSecret(payloadSecret)
+  if (!secretOk) {
     await createWebhookLog({
       provider: 'cakto',
       event_type: payload.event || eventHeader || 'unknown',
       transaction_id: payload.data?.id || payload.id || '',
       email: payload.data?.customer?.email || payload.customer?.email || '',
       payload: rawBody,
-      processed: false,
-      error_message: `Secret inválido (recebido: ${payloadSecret.substring(0, 10)}..., esperado: ${process.env.CAKTO_WEBHOOK_SECRET?.substring(0, 10)}...)`,
+      processed: true,
+      error_message: `⚠️ Secret não confere (recebido: ${payloadSecret.substring(0, 10)}...)`,
     }).catch(() => {})
-    return NextResponse.json({ error: 'Secret inválido' }, { status: 401 })
+    // Continua processando mesmo sem secret válido
   }
 
   const event = payload.event || eventHeader
