@@ -70,14 +70,19 @@ export async function POST(req: NextRequest) {
   }
 
   const event = payload.event || eventHeader
-  const data = payload.data || payload
+  let data = payload.data || payload
+
+  // Cakto envia data como array — pegar o primeiro item
+  if (Array.isArray(data)) {
+    data = data[0] || {}
+  }
 
   // Extrair campos com fallbacks
   const orderId = data.id || payload.transaction_id || payload.id || ''
   const email = (data.customer?.email || payload.customer?.email || payload.buyer?.email || '').toLowerCase().trim()
   const name = data.customer?.name || payload.customer?.name || payload.buyer?.name || email
   const productName = data.product?.name || payload.product_name || 'ECONOMIZZEI'
-  const amount = Number(data.amount || payload.amount || 0)
+  const amount = Number(data.offer?.price || data.amount || payload.amount || 0)
   const status = data.status || payload.status || ''
 
   if (!email || !orderId) {
