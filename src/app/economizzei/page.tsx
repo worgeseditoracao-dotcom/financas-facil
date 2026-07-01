@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Script from 'next/script'
 import { CAKTO_CHECKOUT_URL } from '@/lib/config'
 import {
   Check, Shield, Zap, Star, ChevronDown, ChevronUp, ArrowRight, ArrowDown,
@@ -32,10 +33,12 @@ const modulos = [
 ]
 const TOTAL_MODULOS = modulos.reduce((a, m) => a + parseFloat(m.price), 0)
 
-function track(n: string) { try { (window as any).fbq?.('trackCustom', n) } catch {} }
+function track(n: string, data?: any) { try { (window as any).fbq?.('track', n, data) } catch {} }
+
+const PIXEL = '1193761196228886'
 
 function Btn({ children, big, full }: { children: React.ReactNode; big?: boolean; full?: boolean }) {
-  return <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" onClick={() => track('CTA')}
+  return <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" onClick={() => track('Lead', { content_name: 'ECONOMIZZEI', value: 67.90, currency: 'BRL' })}
     className={`inline-flex items-center justify-center gap-2 rounded-2xl font-bold text-white shadow-xl transition-all duration-300 hover:scale-[1.03] active:scale-[.97] hover:shadow-2xl ${big ? 'px-10 py-5 text-lg' : 'px-6 py-3.5 text-sm'} ${full ? 'w-full' : ''}`}
     style={{ background: `linear-gradient(135deg, ${COLOR}, #7C3AED)` }}>{children}</a>
 }
@@ -97,6 +100,8 @@ export default function VendasPage() {
     if (el) o.observe(el)
   }, [])
 
+  useEffect(() => { track('PageView') }, [])
+
   const slides = [
     { t:'Dashboard', d:'Visão completa em tempo real', b:'Tome decisões baseadas em dados', img:'/prints/dashboard.png' },
     { t:'Contas', d:'Contas a pagar e receber', b:'Nunca mais esqueça um vencimento', img:'/prints/contas.png' },
@@ -117,6 +122,9 @@ export default function VendasPage() {
 
   return (
     <div className="w-full min-h-screen font-sans scroll-smooth overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0A0614 0%, #100B20 50%, #0A0614 100%)', color: '#fff' }}>
+      <Script id="meta-pixel" strategy="afterInteractive">
+        {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${PIXEL}');fbq('track','PageView');`}
+      </Script>
       <style>{`
         @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
