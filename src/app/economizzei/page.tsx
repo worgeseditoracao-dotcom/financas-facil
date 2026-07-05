@@ -20,7 +20,7 @@ const CHECKOUT = CAKTO_CHECKOUT_URL || '#'
 const SOLD = 87
 const TOTAL = 100
 const LEFT = TOTAL - SOLD
-const COUPON = 'ECONOMIZZEI10'
+const COUPON = 'EUQUERO'
 const COUPON_PCT = 10
 
 const modulos = [
