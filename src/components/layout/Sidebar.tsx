@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, Briefcase, Tags, BarChart3, Settings,
   Target, Users, FileText, Lightbulb, CalendarRange,
   TrendingUp, CreditCard, Building2, ChevronLeft, ChevronRight,
-  DollarSign, Truck, RefreshCw, Shield, MessageSquare
+  DollarSign, Truck, RefreshCw, Shield, MessageSquare, Zap
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/AuthContext'
@@ -30,6 +30,7 @@ const links = [
   { href: '/empresas', label: 'Empresas', icon: Building2 },
   { href: '/insights-tips', label: 'Insights', icon: Lightbulb },
   { href: '/importar', label: 'Importar', icon: FileText },
+  { href: '/vendas', label: 'Oferta Especial', icon: Zap },
   { href: '/calculadora-impostos', label: 'Impostos', icon: DollarSign },
   { href: '/configuracoes', label: 'Config', icon: Settings },
 ]
