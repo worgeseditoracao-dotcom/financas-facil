@@ -316,8 +316,8 @@ export default function VendasPage() {
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col lg:flex-row items-center gap-6">
           {/* GALERIA MOBILE */}
-          <div className="flex lg:hidden flex-col items-center gap-4 w-full">
-            <div className="w-[95%] cursor-pointer" onClick={() => setLightbox(true)}>
+          <div className="flex lg:hidden flex-col items-center gap-3 w-full">
+            <div className="w-full px-1 cursor-pointer" onClick={() => setLightbox(true)}>
               <div className="glass rounded-3xl overflow-hidden shadow-2xl">
                 <div className="aspect-[16/10] bg-[#0A0614] relative">
                   <img src={slides[carIdx].img} alt={slides[carIdx].t} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
