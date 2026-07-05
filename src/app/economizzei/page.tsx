@@ -166,7 +166,7 @@ export default function VendasPage() {
       {/* CUPOM SURPRESA */}
       <div className="text-center py-3 px-4" style={{ background: `linear-gradient(90deg, ${COLOR}, #7C3AED)` }}>
         <p className="text-xs md:text-sm font-bold text-white">
-          🎁 CUPOM SURPRESA: <span className="bg-white/20 px-2 py-0.5 rounded-lg">{COUPON}</span> — {COUPON_PCT}% OFF por tempo limitado!
+          🎁 CUPOM SURPRESA ATIVO: use <span className="bg-white/20 px-2 py-0.5 rounded-lg">{COUPON}</span> e garanta desconto exclusivo!
         </p>
       </div>
 
@@ -183,8 +183,8 @@ export default function VendasPage() {
           </h1>
           <p className="mt-4 md:mt-6 text-sm md:text-lg text-zinc-400 max-w-xl mx-auto afade">Chega de planilhas, apps separados e confusão. Controle receitas, cartões, metas, investimentos e fluxo de caixa da sua empresa com um sistema profissional.</p>
           <p className="mt-3 text-xs text-cyan-400/70 afade">☁️ Sincronização em nuvem — comece no celular, continue no computador. Seus dados sempre atualizados.</p>
-          <div className="mt-8 afade"><Btn big>QUERO MINHA LICENÇA COM {COUPON_PCT}% OFF <ArrowRight size={20} /></Btn>
-            <p className="mt-3 text-xs md:text-sm text-zinc-500">De <span className="line-through text-zinc-600">R$ {PRICE_NORMAL}</span> por <span className="text-white font-bold">R$ {PRICE_PROMO}</span> · Código: <span className="text-cyan-400 font-bold">{COUPON}</span></p>
+          <div className="mt-8 afade"><Btn big>QUERO MINHA LICENÇA AGORA <ArrowRight size={20} /></Btn>
+            <p className="mt-3 text-xs md:text-sm text-zinc-500">De <span className="line-through text-zinc-600">R$ {PRICE_NORMAL}</span> por <span className="text-white font-bold">R$ {PRICE_PROMO}</span> · Use o cupom <span className="text-cyan-400 font-bold">{COUPON}</span></p>
           </div>
         </div>
       </section>
