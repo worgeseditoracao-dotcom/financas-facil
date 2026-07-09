@@ -519,7 +519,7 @@ export default function VendasPage() {
 
       {/* CTA FLUTUANTE MOBILE */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 p-2.5" style={{background:'rgba(10,6,20,.95)',backdropFilter:'blur(16px)',borderTop:'1px solid rgba(255,255,255,.08)'}}>
-        <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" onClick={()=>track('Mobile')} className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white active:scale-[.98]" style={{background:`linear-gradient(135deg,${COLOR},#7C3AED)`}}><Zap size={16} /> QUERO MINHA LICENÇA · R$ {PRICE_PROMO}</a>
+        <a href={CHECKOUT} target="_blank" rel="noopener noreferrer" onClick={()=>track('Lead',{content_name:'ECONOMIZZEI',value:67.90,currency:'BRL'})} className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white active:scale-[.98]" style={{background:`linear-gradient(135deg,${COLOR},#7C3AED)`}}><Zap size={16} /> QUERO MINHA LICENÇA · R$ {PRICE_PROMO}</a>
       </div>
     </div>
   )
