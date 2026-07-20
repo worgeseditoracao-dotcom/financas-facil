@@ -6,7 +6,8 @@ export async function GET() {
   const tables = ['users', 'purchases', 'webhook_logs', 'companies', 'business_products', 'product_sales', 'user_data', 'messages']
 
   for (const t of tables) {
-    const { error } = await supabase.from(t).select('id').limit(1)
+    const col = t === 'user_data' ? 'user_id' : 'id'
+    const { error } = await supabase.from(t).select(col).limit(1)
     results.push(error ? `❌ ${t}` : `✅ ${t}`)
   }
 
